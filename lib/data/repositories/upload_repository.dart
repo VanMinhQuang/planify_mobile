@@ -5,62 +5,41 @@ import 'package:dio/dio.dart';
 import '../../core/config/app_config.dart';
 import '../../domain/models/plan.dart';
 import '../api/api_client.dart';
-import '../services/firebase_upload_service.dart';
 
 class UploadRepository {
-  UploadRepository({
-    required ApiClient apiClient,
-    required FirebaseUploadService uploadService,
-  }) : _apiClient = apiClient,
-       _uploadService = uploadService;
+  UploadRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   final ApiClient _apiClient;
-  final FirebaseUploadService _uploadService;
 
   Future<String> uploadPlanCover({
     required String planId,
     required File file,
   }) async {
     if (AppConfig.uploadMode == 'iis') {
-      final formData = FormData.fromMap({
-        'kind': 'PLAN_COVER',
-        'planId': planId,
-        'file': await MultipartFile.fromFile(
-          file.path,
-          filename: file.uri.pathSegments.last,
-        ),
-      });
-      final response = await _apiClient.dio.post<Map<String, dynamic>>(
-        '/uploads/iis',
-        data: formData,
-      );
-      return response.data!['publicUrl'] as String;
+      return _uploadMultipart('/uploads/iis', planId, file);
     }
 
-    final pathResponse = await _apiClient.dio.post<Map<String, dynamic>>(
-      '/uploads/firebase-path',
-      data: {
-        'kind': 'PLAN_COVER',
-        'planId': planId,
-        'fileName': file.uri.pathSegments.last,
-      },
+    if (AppConfig.uploadMode == 'r2') {
+      return _uploadMultipart('/uploads/r2', planId, file);
+    }
+
+    throw UnsupportedError('Unsupported upload mode: ${AppConfig.uploadMode}');
+  }
+
+  Future<String> _uploadMultipart(String path, String planId, File file) async {
+    final formData = FormData.fromMap({
+      'kind': 'PLAN_COVER',
+      'planId': planId,
+      'file': await MultipartFile.fromFile(
+        file.path,
+        filename: file.uri.pathSegments.last,
+      ),
+    });
+    final response = await _apiClient.dio.post<Map<String, dynamic>>(
+      path,
+      data: formData,
     );
-    final objectPath = pathResponse.data!['objectPath'] as String;
-    final url = await _uploadService.uploadFile(
-      file: file,
-      objectPath: objectPath,
-    );
-    await _apiClient.dio.post(
-      '/uploads/complete',
-      data: {
-        'kind': 'PLAN_COVER',
-        'planId': planId,
-        'objectPath': objectPath,
-        'publicUrl': url,
-        'sizeBytes': await file.length(),
-      },
-    );
-    return url;
+    return response.data!['publicUrl'] as String;
   }
 
   Future<Plan> attachCoverUrl(String planId, String url) async {

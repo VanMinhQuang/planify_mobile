@@ -6,7 +6,6 @@ import '../data/repositories/auth_repository.dart';
 import '../data/repositories/notification_repository.dart';
 import '../data/repositories/plan_repository.dart';
 import '../data/repositories/upload_repository.dart';
-import '../data/services/firebase_upload_service.dart';
 import '../data/services/realtime_service.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import 'router.dart';
@@ -35,10 +34,7 @@ class PlanifyApp extends StatelessWidget {
           create: (_) => NotificationRepository(apiClient: apiClient),
         ),
         RepositoryProvider(
-          create: (_) => UploadRepository(
-            apiClient: apiClient,
-            uploadService: FirebaseUploadService(),
-          ),
+          create: (_) => UploadRepository(apiClient: apiClient),
         ),
       ],
       child: BlocProvider(

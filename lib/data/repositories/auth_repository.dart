@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -22,15 +23,18 @@ class AuthRepository {
     required ApiClient apiClient,
     required RealtimeService realtimeService,
     GoogleSignIn? googleSignIn,
+    FirebaseAuth? firebaseAuth,
     FirebaseMessaging? messaging,
   }) : _apiClient = apiClient,
        _realtimeService = realtimeService,
        _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: ['email']),
+       _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
        _messaging = messaging ?? FirebaseMessaging.instance;
 
   final ApiClient _apiClient;
   final RealtimeService _realtimeService;
   final GoogleSignIn _googleSignIn;
+  final FirebaseAuth _firebaseAuth;
   final FirebaseMessaging _messaging;
 
   Future<AuthSession?> restoreSession() async {
@@ -57,10 +61,61 @@ class AuthRepository {
       throw StateError('Google sign in was cancelled');
     }
 
-    final auth = await account.authentication;
+    final googleAuth = await account.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    final firebaseUser = (await _firebaseAuth.signInWithCredential(
+      credential,
+    )).user;
+    final firebaseIdToken = await firebaseUser?.getIdToken();
+    if (firebaseIdToken == null) {
+      throw StateError('Firebase Auth did not return an ID token');
+    }
+
+    return _createBackendSession('/auth/firebase', {
+      'idToken': firebaseIdToken,
+    });
+  }
+
+  Future<AuthSession> registerWithPhonePassword({
+    required String phone,
+    required String password,
+    String? name,
+  }) {
+    return _createBackendSession('/auth/phone/register', {
+      'phone': phone,
+      'password': password,
+      'name': name,
+    });
+  }
+
+  Future<AuthSession> loginWithPhonePassword({
+    required String phone,
+    required String password,
+  }) {
+    return _createBackendSession('/auth/phone/login', {
+      'phone': phone,
+      'password': password,
+    });
+  }
+
+  Future<void> signOut() async {
+    await _apiClient.dio.post('/auth/logout');
+    await _firebaseAuth.signOut();
+    await _googleSignIn.signOut();
+    await _apiClient.tokenStore.clear();
+    _realtimeService.disconnect();
+  }
+
+  Future<AuthSession> _createBackendSession(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
     final response = await _apiClient.dio.post<Map<String, dynamic>>(
-      '/auth/google',
-      data: {'idToken': auth.idToken},
+      path,
+      data: body,
     );
     final data = response.data!;
     final session = AuthSession(
@@ -76,13 +131,6 @@ class AuthRepository {
     _realtimeService.connect(session.accessToken);
     await _registerDeviceToken();
     return session;
-  }
-
-  Future<void> signOut() async {
-    await _apiClient.dio.post('/auth/logout');
-    await _googleSignIn.signOut();
-    await _apiClient.tokenStore.clear();
-    _realtimeService.disconnect();
   }
 
   Future<void> _registerDeviceToken() async {
