@@ -22,27 +22,12 @@ class ThemeToggleButton extends StatelessWidget {
     );
   }
 
-  ThemeMode get _nextMode {
-    return switch (themeMode) {
-      ThemeMode.system => ThemeMode.light,
-      ThemeMode.light => ThemeMode.dark,
-      ThemeMode.dark => ThemeMode.system,
-    };
-  }
+  ThemeMode get _nextMode =>
+      themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
 
-  IconData get _icon {
-    return switch (themeMode) {
-      ThemeMode.system => LucideIcons.monitor,
-      ThemeMode.light => LucideIcons.sun,
-      ThemeMode.dark => LucideIcons.moon,
-    };
-  }
+  IconData get _icon =>
+      themeMode == ThemeMode.light ? LucideIcons.sun : LucideIcons.moon;
 
-  String get _tooltip {
-    return switch (themeMode) {
-      ThemeMode.system => 'Use light theme',
-      ThemeMode.light => 'Use dark theme',
-      ThemeMode.dark => 'Use system theme',
-    };
-  }
+  String get _tooltip =>
+      themeMode == ThemeMode.light ? 'Use dark theme' : 'Use light theme';
 }

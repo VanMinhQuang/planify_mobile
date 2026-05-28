@@ -1,6 +1,6 @@
-import 'package:app_core/generated/assets.gen.dart';
 import 'package:app_core/ui/constants/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../constants/app_size.dart';
 
@@ -39,22 +39,12 @@ class LoadingDialog extends StatelessWidget {
           Center(
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(20.0)),
-                image: DecorationImage(
-                  image: Assets.images.huyHieu.provider(),
-                  fit: BoxFit.contain,
-                ),
+                color: AppColor.slate900.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(16.sp),
               ),
-              height: 52.h,
-              width: 52.h,
-            ),
-          ),
-          Center(
-            child: SizedBox(
-              height: 64.h,
-              width: 64.h,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(AppColor.muted),
+              child: SpinKitFadingCircle(
+                color: AppColor.planifyLavender,
+                size: 48.h,
               ),
             ),
           ),

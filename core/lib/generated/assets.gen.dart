@@ -59,12 +59,16 @@ class $AssetsImagesGen {
 class $AssetsLogoGen {
   const $AssetsLogoGen();
 
+  /// File path: assets/logo/logo_no_background.png
+  AssetGenImage get logoNoBackground =>
+      const AssetGenImage('assets/logo/logo_no_background.png');
+
   /// File path: assets/logo/planify_icon.png
   AssetGenImage get planifyIcon =>
       const AssetGenImage('assets/logo/planify_icon.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [planifyIcon];
+  List<AssetGenImage> get values => [logoNoBackground, planifyIcon];
 }
 
 class $AssetsTranslationsGen {

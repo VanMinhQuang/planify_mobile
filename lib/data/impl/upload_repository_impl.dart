@@ -26,29 +26,38 @@ class UploadRepositoryImpl implements UploadRepository {
   }
 
   @override
-  Future<Plan> attachCoverUrl(String planId, String url) {
-    return _apiClient.patch(
-      ApiUrl.plan(planId),
-      data: {'coverImageUrl': url},
-      parser: (json) =>
-          PlanDto.fromJson(json as Map<String, dynamic>).toDomain(),
-    );
+  Future<Plan> attachCoverUrl(String planId, String url) async {
+    try {
+      final result = await _apiClient.patch(
+        path: ApiUrl.plan(planId),
+        body: {'coverImageUrl': url},
+        parser: (json) =>
+            PlanDto.fromJson(json as Map<String, dynamic>).toDomain(),
+      );
+      if (result == null) {
+        throw 'Lỗi khi cập nhật dữ liệu';
+      }
+      return result;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<String> _uploadMultipart(String path, String planId, File file) async {
-    final formData = FormData.fromMap({
-      'kind': 'PLAN_COVER',
-      'planId': planId,
-      'file': await MultipartFile.fromFile(
-        file.path,
-        filename: file.uri.pathSegments.last,
-      ),
-    });
-    final response = await _apiClient.post(
-      path,
-      data: formData,
-      parser: (json) => json as Map<String, dynamic>,
-    );
-    return response['publicUrl'] as String;
+    return '';
+    // final formData = FormData.fromMap({
+    //   'kind': 'PLAN_COVER',
+    //   'planId': planId,
+    //   'file': await MultipartFile.fromFile(
+    //     file.path,
+    //     filename: file.uri.pathSegments.last,
+    //   ),
+    // });
+    // final response = await _apiClient.post(
+    //   path,
+    //   data: formData,
+    //   parser: (json) => json as Map<String, dynamic>,
+    // );
+    // return response['publicUrl'] as String;
   }
 }

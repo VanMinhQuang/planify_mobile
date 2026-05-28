@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../constants/app_size.dart';
 import '../constants/app_text_styles.dart';
+import '../theme.dart';
 import 'app_skeleton.dart';
 
 class TextFormFieldComponent extends StatelessWidget {
@@ -81,12 +82,12 @@ class TextFormFieldComponent extends StatelessWidget {
             child: RichText(
               text: TextSpan(
                 text: titleText!,
-                style: AppTextStyles.normal12(color: AppColor.slate700),
+                style: context.normal12(),
                 children: [
                   if (isRequired)
                     TextSpan(
                       text: ' *',
-                      style: AppTextStyles.normal12(color: AppColor.red500),
+                      style: context.normal12(color: context.colors.error),
                     ),
                 ],
               ),

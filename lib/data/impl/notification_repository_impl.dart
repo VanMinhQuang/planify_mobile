@@ -11,24 +11,34 @@ class NotificationRepositoryImpl implements NotificationRepository {
   final ApiClient _apiClient;
 
   @override
-  Future<List<AppNotification>> listNotifications() {
-    return _apiClient.get(
-      ApiUrl.notifications,
-      parser: (json) => (json as List<dynamic>)
-          .map(
-            (item) => AppNotificationDto.fromJson(
-              item as Map<String, dynamic>,
-            ).toDomain(),
-          )
-          .toList(),
-    );
+  Future<List<AppNotification>> listNotifications() async {
+    try {
+      final result = await _apiClient.get(
+        path: ApiUrl.notifications,
+        parser: (json) => (json as List<dynamic>)
+            .map(
+              (item) => AppNotificationDto.fromJson(
+                item as Map<String, dynamic>,
+              ).toDomain(),
+            )
+            .toList(),
+      );
+      return result ?? [];
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
   Future<void> markRead(String notificationId) async {
-    await _apiClient.patch(
-      ApiUrl.notificationRead(notificationId),
-      parser: (_) => null,
-    );
+    try {
+      await _apiClient.patch(
+        path: ApiUrl.notificationRead(notificationId),
+        body: {},
+        parser: (_) => null,
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 }

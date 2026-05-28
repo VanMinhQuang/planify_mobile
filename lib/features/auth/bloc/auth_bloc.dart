@@ -4,44 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/models/app_user.dart';
 import '../../../domain/repository/auth_repository.dart';
 
-abstract class AuthEvent extends Equatable {
-  const AuthEvent();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class AuthStarted extends AuthEvent {}
-
-class AuthGoogleSignInRequested extends AuthEvent {}
-
-class AuthSignOutRequested extends AuthEvent {}
-
-enum AuthStatus { unknown, authenticated, unauthenticated, loading }
-
-class AuthState extends Equatable {
-  const AuthState({this.status = AuthStatus.unknown, this.user, this.message});
-
-  final AuthStatus status;
-  final AppUser? user;
-  final String? message;
-
-  AuthState copyWith({
-    AuthStatus? status,
-    AppUser? user,
-    String? message,
-    bool clearUser = false,
-  }) {
-    return AuthState(
-      status: status ?? this.status,
-      user: clearUser ? null : user ?? this.user,
-      message: message,
-    );
-  }
-
-  @override
-  List<Object?> get props => [status, user, message];
-}
+part 'auth_event.dart';
+part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({required AuthRepository authRepository})
@@ -50,27 +14,52 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthStarted>(_onStarted);
     on<AuthGoogleSignInRequested>(_onGoogleSignIn);
     on<AuthSignOutRequested>(_onSignOut);
+    on<AuthPhone>(_onPhone);
+    on<ChangePhone>(_onChangePhone);
+    on<ChangePassword>(_onChangePassword);
+    on<ChangeObsecure>(_onChangeObsecure);
   }
 
   final AuthRepository _authRepository;
 
-  Future<void> _onStarted(AuthStarted event, Emitter<AuthState> emit) async {
-    emit(state.copyWith(status: AuthStatus.loading));
+  Future<void> _onStarted(AuthStarted event, Emitter<AuthState> emit) async {}
+
+  void _onChangePhone(ChangePhone event, Emitter<AuthState> emit) {
+    emit(
+      state.copyWith(status: AuthStatus.unauthenticated, phone: event.phone),
+    );
+  }
+
+  void _onChangePassword(ChangePassword event, Emitter<AuthState> emit) {
+    emit(
+      state.copyWith(
+        status: AuthStatus.unauthenticated,
+        password: event.password,
+      ),
+    );
+  }
+
+  void _onChangeObsecure(ChangeObsecure event, Emitter<AuthState> emit) {
+    emit(state.copyWith(isObsecure: !state.isObsecure));
+  }
+
+  Future<void> _onPhone(AuthPhone event, Emitter<AuthState> emit) async {
     try {
-      final session = await _authRepository.restoreSession();
-      emit(
-        session == null
-            ? state.copyWith(
-                status: AuthStatus.unauthenticated,
-                clearUser: true,
-              )
-            : state.copyWith(
-                status: AuthStatus.authenticated,
-                user: session.user,
-              ),
+      emit(state.copyWith(status: AuthStatus.loading));
+      final session = await _authRepository.loginWithPhonePassword(
+        phone: state.phone,
+        password: state.password,
       );
-    } catch (_) {
-      emit(state.copyWith(status: AuthStatus.unauthenticated, clearUser: true));
+      await _authRepository.registerDevice();
+      emit(state.copyWith(status: AuthStatus.authenticated, user: session));
+    } catch (error) {
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          clearUser: true,
+          message: error.toString(),
+        ),
+      );
     }
   }
 
@@ -81,13 +70,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(state.copyWith(status: AuthStatus.loading));
     try {
       final session = await _authRepository.signInWithGoogle();
-      emit(
-        state.copyWith(status: AuthStatus.authenticated, user: session.user),
-      );
+      await _authRepository.registerDevice();
+      emit(state.copyWith(status: AuthStatus.authenticated, user: session));
     } catch (error) {
       emit(
         state.copyWith(
-          status: AuthStatus.unauthenticated,
+          status: AuthStatus.error,
           clearUser: true,
           message: error.toString(),
         ),

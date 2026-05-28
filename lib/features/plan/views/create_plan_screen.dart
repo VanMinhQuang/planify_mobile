@@ -102,7 +102,7 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
         ),
       );
       if (mounted) {
-        context.go('/plans/${plan.id}');
+        context.push('/plans/${plan.id}');
       }
     } finally {
       if (mounted) {

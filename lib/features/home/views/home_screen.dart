@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/theme.dart';
 import '../../../app/theme_controller.dart';
 import '../../../domain/models/plan.dart';
 import '../bloc/home_cubit.dart';
@@ -23,17 +22,17 @@ class HomeScreen extends StatelessWidget {
           ),
           IconButton(
             tooltip: 'Calendar',
-            onPressed: () => context.go('/calendar'),
+            onPressed: () => context.push('/calendar'),
             icon: const Icon(Icons.calendar_month_outlined),
           ),
           IconButton(
             tooltip: 'Notifications',
-            onPressed: () => context.go('/notifications'),
+            onPressed: () => context.push('/notifications'),
             icon: const Icon(Icons.notifications_outlined),
           ),
           IconButton(
             tooltip: 'Profile',
-            onPressed: () => context.go('/profile'),
+            onPressed: () => context.push('/profile'),
             icon: const Icon(Icons.person_outline),
           ),
         ],
@@ -63,7 +62,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/plans/new'),
+        onPressed: () => context.push('/plans/new'),
         icon: const Icon(Icons.add),
         label: const Text('Plan'),
       ),

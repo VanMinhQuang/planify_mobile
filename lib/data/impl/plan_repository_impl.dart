@@ -16,105 +16,181 @@ class PlanRepositoryImpl implements PlanRepository {
   final ApiClient _apiClient;
 
   @override
-  Future<List<Plan>> listPlans({String? status}) {
-    return _apiClient.get(
-      ApiUrl.plans,
-      queryParameters: status == null ? null : {'status': status},
-      parser: (json) => _mapList(
-        json,
-        PlanDto.fromJson,
-      ).map((item) => item.toDomain()).toList(),
-    );
+  Future<List<Plan>> listPlans({String? status}) async {
+    try {
+      final result = await _apiClient.get(
+        path: ApiUrl.plans,
+        queryParameters: status == null ? null : {'status': status},
+        parser: (json) => _mapList(
+          json,
+          PlanDto.fromJson,
+        ).map((item) => item.toDomain()).toList(),
+      );
+      return result ?? [];
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<Plan> createPlan(Plan plan) {
-    return _apiClient.post(
-      ApiUrl.plans,
-      data: PlanDto.createBody(plan),
-      parser: (json) =>
-          PlanDto.fromJson(json as Map<String, dynamic>).toDomain(),
-    );
+  Future<Plan> createPlan(Plan plan) async {
+    try {
+      final result = await _apiClient.post(
+        path: ApiUrl.plans,
+        body: PlanDto.createBody(plan),
+        parser: (json) =>
+            PlanDto.fromJson(json as Map<String, dynamic>).toDomain(),
+      );
+
+      if (result == null) {
+        throw 'Lỗi khi tạo dữ liệu';
+      }
+      return result;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<Plan> getPlan(String planId) {
-    return _apiClient.get(
-      ApiUrl.plan(planId),
-      parser: (json) =>
-          PlanDto.fromJson(json as Map<String, dynamic>).toDomain(),
-    );
+  Future<Plan> getPlan(String planId) async {
+    try {
+      final result = await _apiClient.get(
+        path: ApiUrl.plan(planId),
+        parser: (json) =>
+            PlanDto.fromJson(json as Map<String, dynamic>).toDomain(),
+      );
+
+      if (result == null) {
+        throw 'Lỗi khi lấy dữ liệu';
+      }
+
+      return result;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<List<PlanTask>> listTasks(String planId) {
-    return _apiClient.get(
-      ApiUrl.planTasks(planId),
-      parser: (json) => _mapList(
-        json,
-        PlanTaskDto.fromJson,
-      ).map((item) => item.toDomain()).toList(),
-    );
+  Future<List<PlanTask>> listTasks(String planId) async {
+    try {
+      final result = await _apiClient.get(
+        path: ApiUrl.planTasks(planId),
+        parser: (json) => _mapList(
+          json,
+          PlanTaskDto.fromJson,
+        ).map((item) => item.toDomain()).toList(),
+      );
+      return result ?? [];
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<PlanTask> createTask(String planId, String title) {
-    return _apiClient.post(
-      ApiUrl.planTasks(planId),
-      data: {'title': title},
-      parser: (json) =>
-          PlanTaskDto.fromJson(json as Map<String, dynamic>).toDomain(),
-    );
+  Future<PlanTask> createTask(String planId, String title) async {
+    try {
+      final result = await _apiClient.post(
+        path: ApiUrl.planTasks(planId),
+        body: {'title': title},
+        parser: (json) =>
+            PlanTaskDto.fromJson(json as Map<String, dynamic>).toDomain(),
+      );
+
+      if (result == null) {
+        throw 'Lỗi khi tạo dữ liệu';
+      }
+      return result;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<PlanTask> updateTaskDone(String planId, String taskId, bool isDone) {
-    return _apiClient.patch(
-      ApiUrl.planTask(planId, taskId),
-      data: {'isDone': isDone},
-      parser: (json) =>
-          PlanTaskDto.fromJson(json as Map<String, dynamic>).toDomain(),
-    );
+  Future<PlanTask> updateTaskDone(
+    String planId,
+    String taskId,
+    bool isDone,
+  ) async {
+    try {
+      final result = await _apiClient.patch(
+        path: ApiUrl.planTask(planId, taskId),
+        body: {'isDone': isDone},
+        parser: (json) =>
+            PlanTaskDto.fromJson(json as Map<String, dynamic>).toDomain(),
+      );
+
+      if (result == null) {
+        throw 'Lỗi khi cập nhật dữ liệu';
+      }
+      return result;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<List<PlanNote>> listNotes(String planId) {
-    return _apiClient.get(
-      ApiUrl.planNotes(planId),
-      parser: (json) => _mapList(
-        json,
-        PlanNoteDto.fromJson,
-      ).map((item) => item.toDomain()).toList(),
-    );
+  Future<List<PlanNote>> listNotes(String planId) async {
+    try {
+      final result = await _apiClient.get(
+        path: ApiUrl.planNotes(planId),
+        parser: (json) => _mapList(
+          json,
+          PlanNoteDto.fromJson,
+        ).map((item) => item.toDomain()).toList(),
+      );
+      return result ?? [];
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<PlanNote> createNote(String planId, String content) {
-    return _apiClient.post(
-      ApiUrl.planNotes(planId),
-      data: {'content': content},
-      parser: (json) =>
-          PlanNoteDto.fromJson(json as Map<String, dynamic>).toDomain(),
-    );
+  Future<PlanNote> createNote(String planId, String content) async {
+    try {
+      final result = await _apiClient.post(
+        path: ApiUrl.planNotes(planId),
+        body: {'content': content},
+        parser: (json) =>
+            PlanNoteDto.fromJson(json as Map<String, dynamic>).toDomain(),
+      );
+
+      if (result == null) {
+        throw 'Lỗi khi tạo dữ liệu';
+      }
+      return result;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<List<ActivityEntry>> listActivity(String planId) {
-    return _apiClient.get(
-      ApiUrl.planActivity(planId),
-      parser: (json) => _mapList(
-        json,
-        ActivityEntryDto.fromJson,
-      ).map((item) => item.toDomain()).toList(),
-    );
+  Future<List<ActivityEntry>> listActivity(String planId) async {
+    try {
+      final result = await _apiClient.get(
+        path: ApiUrl.planActivity(planId),
+        parser: (json) => _mapList(
+          json,
+          ActivityEntryDto.fromJson,
+        ).map((item) => item.toDomain()).toList(),
+      );
+      return result ?? [];
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<Map<String, dynamic>> createInvite(String planId) {
-    return _apiClient.post(
-      ApiUrl.planInvites(planId),
-      parser: (json) => json as Map<String, dynamic>,
-    );
+  Future<Map<String, dynamic>> createInvite(String planId) async {
+    try {
+      final result = await _apiClient.post(
+        path: ApiUrl.planInvites(planId),
+        body: {}, // empty body
+        parser: (json) => json as Map<String, dynamic>,
+      );
+      return result ?? {};
+    } catch (e) {
+      rethrow;
+    }
   }
 
   List<T> _mapList<T>(

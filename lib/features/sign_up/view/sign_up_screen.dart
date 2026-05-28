@@ -2,9 +2,8 @@ import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:planify_mobile/app/router.dart';
-import 'package:planify_mobile/app/theme.dart';
-
-import '../bloc/sign_up_bloc.dart';
+import 'package:app_core/ui/theme.dart';
+import 'package:planify_mobile/features/sign_up/bloc/sign_up_bloc.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -33,7 +32,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () => context.go(Routes.signIn),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+              return;
+            }
+            context.go(Routes.signIn);
+          },
           icon: const Icon(LucideIcons.arrowLeft),
         ),
         title: const Text('Dang ky'),
@@ -41,8 +46,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
       body: SafeArea(
         child: BlocConsumer<SignUpBloc, SignUpState>(
           listener: (context, state) {
-            if (state.status == SignUpStatus.success) {
-              context.go(Routes.signIn);
+            switch (state.status) {
+              case SignUpStatus.success:
+                LoadingDialog.hide(context);
+                CustomToast.showSuccess(
+                  context: context,
+                  message: 'Dang ky thanh cong',
+                );
+                context.go(Routes.signIn);
+                break;
+              case SignUpStatus.failure:
+                LoadingDialog.hide(context);
+                AppWarningDialog.show(
+                  context: context,
+                  message: state.message ?? '',
+                );
+                break;
+              case SignUpStatus.loading:
+                LoadingDialog.show(context);
+                break;
+              default:
+                break;
             }
           },
           builder: (context, state) {
@@ -58,14 +82,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     'Bat dau lap ke hoach thong minh cung Planify.',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 32),
                   TextFormFieldComponent(
                     controller: _nameController,
-                    titleText: 'Ho va ten',
-                    placeholder: 'Nhap ho va ten',
+                    titleText: 'Ho ten',
+                    placeholder: 'Nhap ho ten',
                     isRequired: true,
                     validator: (value) => value == null || value.isEmpty
-                        ? 'Vui long nhap ho va ten'
+                        ? 'Vui long nhap ho ten'
                         : null,
                   ),
                   const SizedBox(height: 16),
@@ -100,15 +123,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return null;
                     },
                   ),
-                  if (state.message != null) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      state.message!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
+
                   const SizedBox(height: 24),
                   AppButton(
                     onTap: isLoading ? null : _submit,

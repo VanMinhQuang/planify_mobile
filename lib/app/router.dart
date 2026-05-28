@@ -1,25 +1,12 @@
 import 'dart:async';
 
+import 'package:app_core/app_core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
-import '../domain/repository/notification_repository.dart';
-import '../domain/repository/plan_repository.dart';
-import '../domain/repository/sign_up_repository.dart';
-import '../features/auth/bloc/auth_bloc.dart';
-import '../features/auth/bloc/sign_up_bloc.dart';
-import '../features/auth/views/sign_in_screen.dart';
-import '../features/auth/views/sign_up_screen.dart';
-import '../features/calendar/views/calendar_screen.dart';
-import '../features/home/bloc/home_cubit.dart';
-import '../features/home/views/home_screen.dart';
-import '../features/notifications/bloc/notifications_cubit.dart';
-import '../features/notifications/views/notifications_screen.dart';
-import '../features/plan/bloc/plan_detail_cubit.dart';
-import '../features/plan/views/create_plan_screen.dart';
-import '../features/plan/views/plan_detail_screen.dart';
-import '../features/profile/views/profile_screen.dart';
+import 'package:planify_mobile/domain/repository/auth_repository.dart';
+import 'package:planify_mobile/domain/repository/notification_repository.dart';
+import 'package:planify_mobile/domain/repository/plan_repository.dart';
+import 'package:planify_mobile/features/features.dart';
 
 class Routes {
   static const home = "/";
@@ -32,8 +19,11 @@ class Routes {
   static const profile = "/profile";
 }
 
+GoRouter? _routerInstance;
+
 GoRouter createRouter(AuthBloc authBloc) {
-  return GoRouter(
+  if (_routerInstance != null) return _routerInstance!;
+  _routerInstance = GoRouter(
     initialLocation: Routes.signIn,
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {
@@ -45,7 +35,7 @@ GoRouter createRouter(AuthBloc authBloc) {
       if (status == AuthStatus.loading || status == AuthStatus.unknown) {
         return null;
       }
-      if (status == AuthStatus.unauthenticated) {
+      if (status == AuthStatus.unauthenticated || status == AuthStatus.error) {
         return isAuthRoute ? null : Routes.signIn;
       }
       if (isAuthRoute) {
@@ -62,7 +52,7 @@ GoRouter createRouter(AuthBloc authBloc) {
         path: Routes.signUp,
         builder: (context, state) => BlocProvider(
           create: (context) =>
-              SignUpBloc(signUpRepository: context.read<SignUpRepository>()),
+              SignUpBloc(authRepository: context.read<AuthRepository>()),
           child: const SignUpScreen(),
         ),
       ),
@@ -106,6 +96,8 @@ GoRouter createRouter(AuthBloc authBloc) {
       ),
     ],
   );
+
+  return _routerInstance!;
 }
 
 class GoRouterRefreshStream extends ChangeNotifier {
