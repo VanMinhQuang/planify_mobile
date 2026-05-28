@@ -8,7 +8,10 @@ import 'package:planify_mobile/app/app.dart';
 import 'package:planify_mobile/app/config.dart';
 import 'package:planify_mobile/di/injection.dart';
 
-Future<void> bootstrap({required AppConfig config, required FirebaseOptions options}) async {
+Future<void> bootstrap({
+  required AppConfig config,
+  required FirebaseOptions options,
+}) async {
   runZonedGuarded<Future<void>>(
     () async {
       WidgetsFlutterBinding.ensureInitialized();

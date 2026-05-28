@@ -744,7 +744,7 @@ static const Map<String,dynamic> _vi = {
   "placeholder_password_waring": "Vui lòng nhập mật khẩu",
   "login": "Đăng nhập",
   "police_force_title": "CÔNG AN XÃ",
-  "policde_force_name": "PHƯỚC THÁI",
+  "police_force_name": "PHƯỚC THÁI",
   "confirm": "Xác nhận",
   "close": "Đóng",
   "api_error": "Lỗi kết nối tới máy chủ, Vui lòng liên hệ để hỗ trợ",

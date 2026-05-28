@@ -17,8 +17,15 @@ import 'package:vector_graphics/vector_graphics.dart' as _vg;
 class $AssetsIconGen {
   const $AssetsIconGen();
 
+  /// File path: assets/icon/Tiled-1.12.1_Windows-10+_x86_64.msi
+  String get tiled1121Windows10X8664 =>
+      'assets/icon/Tiled-1.12.1_Windows-10+_x86_64.msi';
+
   /// File path: assets/icon/english.svg
   SvgGenImage get english => const SvgGenImage('assets/icon/english.svg');
+
+  /// File path: assets/icon/google.svg
+  SvgGenImage get google => const SvgGenImage('assets/icon/google.svg');
 
   /// File path: assets/icon/icon.png
   AssetGenImage get icon => const AssetGenImage('assets/icon/icon.png');
@@ -27,7 +34,13 @@ class $AssetsIconGen {
   SvgGenImage get vietnam => const SvgGenImage('assets/icon/vietnam.svg');
 
   /// List of all assets
-  List<dynamic> get values => [english, icon, vietnam];
+  List<dynamic> get values => [
+    tiled1121Windows10X8664,
+    english,
+    google,
+    icon,
+    vietnam,
+  ];
 }
 
 class $AssetsImagesGen {
@@ -46,15 +59,12 @@ class $AssetsImagesGen {
 class $AssetsLogoGen {
   const $AssetsLogoGen();
 
-  /// File path: assets/logo/logo-cong-an-vector-03.ico
-  String get logoCongAnVector03Ico => 'assets/logo/logo-cong-an-vector-03.ico';
-
-  /// File path: assets/logo/logo-cong-an-vector-03.png
-  AssetGenImage get logoCongAnVector03Png =>
-      const AssetGenImage('assets/logo/logo-cong-an-vector-03.png');
+  /// File path: assets/logo/planify_icon.png
+  AssetGenImage get planifyIcon =>
+      const AssetGenImage('assets/logo/planify_icon.png');
 
   /// List of all assets
-  List<dynamic> get values => [logoCongAnVector03Ico, logoCongAnVector03Png];
+  List<AssetGenImage> get values => [planifyIcon];
 }
 
 class $AssetsTranslationsGen {

@@ -2,40 +2,21 @@ import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
 
 class PlanifyTheme {
-  static const _primary = Color(0xFF2F6FED);
-  static const _secondary = Color(0xFF13A86B);
-  static const _tertiary = Color(0xFFE9A227);
-
   static ThemeData light() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _primary,
-      primary: _primary,
-      secondary: _secondary,
-      tertiary: _tertiary,
-      surface: const Color(0xFFF8FAFC),
-    );
-
     return _baseTheme(
-      scheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-      cardColor: Colors.white,
+      scheme: AppColor.planifyLightScheme,
+      scaffoldBackgroundColor: AppColor.planifyCloud,
+      cardColor: AppColor.planifySurface,
+      gradients: PlanifyGradientTheme.light,
     );
   }
 
   static ThemeData dark() {
-    final scheme = ColorScheme.fromSeed(
-      brightness: Brightness.dark,
-      seedColor: _primary,
-      primary: const Color(0xFF8FB4FF),
-      secondary: const Color(0xFF62D8A3),
-      tertiary: const Color(0xFFFFC35C),
-      surface: const Color(0xFF121826),
-    );
-
     return _baseTheme(
-      scheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFF0D111A),
-      cardColor: const Color(0xFF171E2E),
+      scheme: AppColor.planifyDarkScheme,
+      scaffoldBackgroundColor: AppColor.planifyNight,
+      cardColor: AppColor.planifyNightSurface,
+      gradients: PlanifyGradientTheme.dark,
     );
   }
 
@@ -43,6 +24,7 @@ class PlanifyTheme {
     required ColorScheme scheme,
     required Color scaffoldBackgroundColor,
     required Color cardColor,
+    required PlanifyGradientTheme gradients,
   }) {
     final baseTheme = ThemeData(
       useMaterial3: true,
@@ -55,6 +37,7 @@ class PlanifyTheme {
     ).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
 
     return baseTheme.copyWith(
+      extensions: [gradients],
       textTheme: textTheme,
       primaryTextTheme: GoogleFonts.beVietnamProTextTheme(
         baseTheme.primaryTextTheme,
@@ -85,10 +68,24 @@ class PlanifyTheme {
           borderSide: BorderSide(color: scheme.primary, width: 1.5),
         ),
         filled: true,
-        fillColor: scheme.surface,
+        fillColor: scheme.surfaceContainerLow,
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: cardColor,
+        indicatorColor: scheme.primaryContainer,
+        labelTextStyle: WidgetStatePropertyAll(
+          textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
           textStyle: textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w700,
           ),
@@ -97,6 +94,8 @@ class PlanifyTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
           textStyle: textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w700,
           ),
@@ -118,6 +117,9 @@ extension PlanifyContextTheme on BuildContext {
   ThemeData get theme => Theme.of(this);
 
   ColorScheme get colors => theme.colorScheme;
+
+  PlanifyGradientTheme get gradients =>
+      theme.extension<PlanifyGradientTheme>() ?? PlanifyGradientTheme.light;
 
   TextTheme get textStyles => theme.textTheme;
 

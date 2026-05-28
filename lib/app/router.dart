@@ -6,8 +6,11 @@ import 'package:go_router/go_router.dart';
 
 import '../domain/repository/notification_repository.dart';
 import '../domain/repository/plan_repository.dart';
+import '../domain/repository/sign_up_repository.dart';
 import '../features/auth/bloc/auth_bloc.dart';
+import '../features/auth/bloc/sign_up_bloc.dart';
 import '../features/auth/views/sign_in_screen.dart';
+import '../features/auth/views/sign_up_screen.dart';
 import '../features/calendar/views/calendar_screen.dart';
 import '../features/home/bloc/home_cubit.dart';
 import '../features/home/views/home_screen.dart';
@@ -21,6 +24,7 @@ import '../features/profile/views/profile_screen.dart';
 class Routes {
   static const home = "/";
   static const signIn = "/sign-in";
+  static const signUp = "/sign-up";
   static const plansNew = "/plans/new";
   static const plansDetail = "/plans/:planId";
   static const calendar = "/calendar";
@@ -30,11 +34,13 @@ class Routes {
 
 GoRouter createRouter(AuthBloc authBloc) {
   return GoRouter(
-    initialLocation: Routes.home,
+    initialLocation: Routes.signIn,
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {
       final status = authBloc.state.status;
-      final isAuthRoute = state.matchedLocation == Routes.signIn;
+      final isAuthRoute =
+          state.matchedLocation == Routes.signIn ||
+          state.matchedLocation == Routes.signUp;
 
       if (status == AuthStatus.loading || status == AuthStatus.unknown) {
         return null;
@@ -51,6 +57,14 @@ GoRouter createRouter(AuthBloc authBloc) {
       GoRoute(
         path: Routes.signIn,
         builder: (context, state) => const SignInScreen(),
+      ),
+      GoRoute(
+        path: Routes.signUp,
+        builder: (context, state) => BlocProvider(
+          create: (context) =>
+              SignUpBloc(signUpRepository: context.read<SignUpRepository>()),
+          child: const SignUpScreen(),
+        ),
       ),
       GoRoute(
         path: Routes.home,

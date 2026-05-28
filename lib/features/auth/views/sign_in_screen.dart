@@ -1,6 +1,11 @@
+import 'package:app_core/app_core.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:planify_mobile/app/router.dart';
+import 'package:planify_mobile/app/theme.dart';
 
+import '../../../app/theme_controller.dart';
 import '../bloc/auth_bloc.dart';
 
 class SignInScreen extends StatelessWidget {
@@ -14,37 +19,54 @@ class SignInScreen extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
-              final isLoading = state.status == AuthStatus.loading;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Spacer(),
-                  Text(
-                    'Planify',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ThemeToggleButton(
+                      themeMode: PlanifyThemeScope.of(context).themeMode,
+                      onChanged: PlanifyThemeScope.of(context).setThemeMode,
                     ),
                   ),
+                  const Spacer(),
+                  Text('Planify', style: context.bold24()),
                   const SizedBox(height: 8),
                   Text(
                     'Plan everything, forget nothing.',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 32),
-                  FilledButton.icon(
-                    onPressed: isLoading
-                        ? null
-                        : () => context.read<AuthBloc>().add(
-                            AuthGoogleSignInRequested(),
-                          ),
-                    icon: isLoading
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.login),
-                    label: const Text('Continue with Google'),
+                  AppButton(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 10.w,
+                      children: [
+                        Icon(LucideIcons.phone, color: AppColor.white),
+                        Text(
+                          'Đăng nhập bằng Số điện thoại',
+                          style: context.bold14(color: AppColor.white),
+                        ),
+                      ],
+                    ),
                   ),
+                  Separator.spacer(10.h),
+                  AppButton(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 10.w,
+                      children: [
+                        Assets.icon.google.svg(width: 20.w),
+                        Text(
+                          'Đăng nhập bằng Google',
+                          style: context.bold14(color: AppColor.white),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   if (state.message != null) ...[
                     const SizedBox(height: 16),
                     Text(
@@ -54,6 +76,30 @@ class SignInScreen extends StatelessWidget {
                       ),
                     ),
                   ],
+
+                  Separator.spacer(15.h),
+                  Center(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Bạn chưa có tài khoản? ",
+                            style: context.normal12(),
+                          ),
+                          TextSpan(
+                            text: 'Đăng ký',
+                            style: context.semiBold14(
+                              color: AppColor.planifyLavender,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                context.go(Routes.signUp);
+                              },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   const Spacer(),
                 ],
               );

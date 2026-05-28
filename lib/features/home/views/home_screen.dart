@@ -1,9 +1,10 @@
+import 'package:app_core/app_core.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
+import '../../../app/theme.dart';
+import '../../../app/theme_controller.dart';
 import '../../../domain/models/plan.dart';
 import '../bloc/home_cubit.dart';
 
@@ -16,6 +17,10 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Planify'),
         actions: [
+          ThemeToggleButton(
+            themeMode: PlanifyThemeScope.of(context).themeMode,
+            onChanged: PlanifyThemeScope.of(context).setThemeMode,
+          ),
           IconButton(
             tooltip: 'Calendar',
             onPressed: () => context.go('/calendar'),
@@ -33,25 +38,29 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocBuilder<HomeCubit, HomeState>(
-        builder: (context, state) {
-          if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state.plans.isEmpty) {
-            return const _EmptyHome();
-          }
-          return RefreshIndicator(
-            onRefresh: () => context.read<HomeCubit>().load(),
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemBuilder: (context, index) =>
-                  _PlanCard(plan: state.plans[index]),
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemCount: state.plans.length,
-            ),
-          );
-        },
+      body: Container(
+        decoration: BoxDecoration(gradient: context.gradients.background),
+        child: BlocBuilder<HomeCubit, HomeState>(
+          builder: (context, state) {
+            if (state.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state.plans.isEmpty) {
+              return const _EmptyHome();
+            }
+            return RefreshIndicator(
+              onRefresh: () => context.read<HomeCubit>().load(),
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemBuilder: (context, index) =>
+                    _PlanCard(plan: state.plans[index]),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemCount: state.plans.length,
+              ),
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/plans/new'),

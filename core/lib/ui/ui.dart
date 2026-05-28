@@ -47,3 +47,4 @@ export 'widgets/tag_chip.dart';
 export 'widgets/grid_widget.dart';
 export 'widgets/text_avatar.dart';
 export 'widgets/meta_item.dart';
+export 'widgets/theme_toggle_button.dart';

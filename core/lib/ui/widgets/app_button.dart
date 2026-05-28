@@ -11,6 +11,7 @@ class AppButton extends StatelessWidget {
     this.colorButton,
     this.borderColor = Colors.transparent,
     this.padding,
+    this.foregroundColor = AppColor.white,
   });
 
   final void Function()? onTap;
@@ -19,12 +20,11 @@ class AppButton extends StatelessWidget {
   final LinearGradient? colorButton;
   final Color borderColor;
   final EdgeInsets? padding;
-
-  LinearGradient get _effectiveGradient =>
-      colorButton ?? AppColor.primaryGradient;
+  final Color foregroundColor;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveGradient = colorButton ?? context.planifyGradients.primary;
     return Opacity(
       opacity: isDisabled ? 0.5 : 1.0,
       child: Material(
@@ -37,9 +37,9 @@ class AppButton extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: isDisabled
                   ? LinearGradient(
-                      colors: [Colors.grey.shade300, Colors.grey.shade300],
+                      colors: [AppColor.slate200, AppColor.slate300],
                     )
-                  : _effectiveGradient,
+                  : effectiveGradient,
               borderRadius: AppRadius.rounded10,
               border: Border.all(color: borderColor),
             ),
