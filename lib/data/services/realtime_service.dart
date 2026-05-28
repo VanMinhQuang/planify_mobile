@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-import '../../core/config/app_config.dart';
+import '../../app/config.dart';
 
 class RealtimeService {
+  RealtimeService({required AppConfig config}) : _config = config;
+
+  final AppConfig _config;
   io.Socket? _socket;
   final _events = StreamController<Map<String, dynamic>>.broadcast();
 
@@ -13,7 +16,7 @@ class RealtimeService {
   void connect(String token) {
     _socket?.dispose();
     _socket = io.io(
-      AppConfig.realtimeUrl,
+      _config.realtimeUrl,
       io.OptionBuilder()
           .setTransports(['websocket'])
           .setAuth({'token': token})

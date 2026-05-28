@@ -1,14 +1,14 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-import 'app/app.dart';
+import 'package:planify_mobile/app/bootstrap.dart';
+import 'package:planify_mobile/app/config.dart';
+import 'package:planify_mobile/firebase_options.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp();
-  } catch (_) {
-    // Firebase app files are added per environment; keep local UI tests runnable.
-  }
-  runApp(const PlanifyApp());
+void main() {
+  unawaited(
+    bootstrap(
+      config: appConfig,
+      options: DefaultFirebaseOptions.currentPlatform,
+    ),
+  );
 }

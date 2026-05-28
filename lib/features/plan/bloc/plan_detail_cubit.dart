@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/repositories/plan_repository.dart';
 import '../../../domain/models/activity_entry.dart';
 import '../../../domain/models/plan.dart';
 import '../../../domain/models/plan_note.dart';
 import '../../../domain/models/plan_task.dart';
+import '../../../domain/repository/plan_repository.dart';
 
 class PlanDetailState extends Equatable {
   const PlanDetailState({

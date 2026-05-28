@@ -15,16 +15,6 @@ class AppUser extends Equatable {
   final String? phone;
   final String? avatarUrl;
 
-  factory AppUser.fromJson(Map<String, dynamic> json) {
-    return AppUser(
-      id: json['id'] as String,
-      name: json['name'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      phone: json['phone'] as String?,
-      avatarUrl: json['avatarUrl'] as String?,
-    );
-  }
-
   @override
   List<Object?> get props => [id, name, email, phone, avatarUrl];
 }

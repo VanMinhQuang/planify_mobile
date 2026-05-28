@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/repositories/notification_repository.dart';
 import '../../../domain/models/app_notification.dart';
+import '../../../domain/repository/notification_repository.dart';
 
 class NotificationsState extends Equatable {
   const NotificationsState({this.isLoading = false, this.items = const []});

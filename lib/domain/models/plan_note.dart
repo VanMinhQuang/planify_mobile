@@ -15,16 +15,6 @@ class PlanNote extends Equatable {
   final String createdBy;
   final DateTime createdAt;
 
-  factory PlanNote.fromJson(Map<String, dynamic> json) {
-    return PlanNote(
-      id: json['id'] as String,
-      planId: json['planId'] as String,
-      content: json['content'] as String? ?? '',
-      createdBy: json['createdBy'] as String? ?? '',
-      createdAt: DateTime.parse(json['createdAt'] as String),
-    );
-  }
-
   @override
   List<Object?> get props => [id, planId, content, createdBy, createdAt];
 }

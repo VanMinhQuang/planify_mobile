@@ -17,17 +17,6 @@ class ActivityEntry extends Equatable {
   final String? targetTitle;
   final DateTime createdAt;
 
-  factory ActivityEntry.fromJson(Map<String, dynamic> json) {
-    return ActivityEntry(
-      id: json['id'] as String,
-      planId: json['planId'] as String,
-      action: json['action'] as String? ?? '',
-      userId: json['userId'] as String? ?? '',
-      targetTitle: json['targetTitle'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-    );
-  }
-
   @override
   List<Object?> get props => [
     id,

@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/repositories/notification_repository.dart';
-import '../data/repositories/plan_repository.dart';
+import '../domain/repository/notification_repository.dart';
+import '../domain/repository/plan_repository.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/views/sign_in_screen.dart';
 import '../features/calendar/views/calendar_screen.dart';
@@ -18,32 +18,42 @@ import '../features/plan/views/create_plan_screen.dart';
 import '../features/plan/views/plan_detail_screen.dart';
 import '../features/profile/views/profile_screen.dart';
 
+class Routes {
+  static const home = "/";
+  static const signIn = "/sign-in";
+  static const plansNew = "/plans/new";
+  static const plansDetail = "/plans/:planId";
+  static const calendar = "/calendar";
+  static const notifications = "/notifications";
+  static const profile = "/profile";
+}
+
 GoRouter createRouter(AuthBloc authBloc) {
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: Routes.home,
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {
       final status = authBloc.state.status;
-      final isAuthRoute = state.matchedLocation == '/sign-in';
+      final isAuthRoute = state.matchedLocation == Routes.signIn;
 
       if (status == AuthStatus.loading || status == AuthStatus.unknown) {
         return null;
       }
       if (status == AuthStatus.unauthenticated) {
-        return isAuthRoute ? null : '/sign-in';
+        return isAuthRoute ? null : Routes.signIn;
       }
       if (isAuthRoute) {
-        return '/';
+        return Routes.home;
       }
       return null;
     },
     routes: [
       GoRoute(
-        path: '/sign-in',
+        path: Routes.signIn,
         builder: (context, state) => const SignInScreen(),
       ),
       GoRoute(
-        path: '/',
+        path: Routes.home,
         builder: (context, state) => BlocProvider(
           create: (context) =>
               HomeCubit(planRepository: context.read<PlanRepository>())..load(),
@@ -51,11 +61,11 @@ GoRouter createRouter(AuthBloc authBloc) {
         ),
       ),
       GoRoute(
-        path: '/plans/new',
+        path: Routes.plansNew,
         builder: (context, state) => const CreatePlanScreen(),
       ),
       GoRoute(
-        path: '/plans/:planId',
+        path: Routes.plansDetail,
         builder: (context, state) => BlocProvider(
           create: (context) =>
               PlanDetailCubit(planRepository: context.read<PlanRepository>())
@@ -64,11 +74,11 @@ GoRouter createRouter(AuthBloc authBloc) {
         ),
       ),
       GoRoute(
-        path: '/calendar',
+        path: Routes.calendar,
         builder: (context, state) => const CalendarScreen(),
       ),
       GoRoute(
-        path: '/notifications',
+        path: Routes.notifications,
         builder: (context, state) => BlocProvider(
           create: (context) => NotificationsCubit(
             notificationRepository: context.read<NotificationRepository>(),
@@ -77,7 +87,7 @@ GoRouter createRouter(AuthBloc authBloc) {
         ),
       ),
       GoRoute(
-        path: '/profile',
+        path: Routes.profile,
         builder: (context, state) => const ProfileScreen(),
       ),
     ],

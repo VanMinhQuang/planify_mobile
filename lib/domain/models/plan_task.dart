@@ -17,19 +17,6 @@ class PlanTask extends Equatable {
   final String? assignedTo;
   final DateTime? dueDate;
 
-  factory PlanTask.fromJson(Map<String, dynamic> json) {
-    return PlanTask(
-      id: json['id'] as String,
-      planId: json['planId'] as String,
-      title: json['title'] as String? ?? '',
-      isDone: json['isDone'] as bool? ?? false,
-      assignedTo: json['assignedTo'] as String?,
-      dueDate: json['dueDate'] == null
-          ? null
-          : DateTime.parse(json['dueDate'] as String),
-    );
-  }
-
   @override
   List<Object?> get props => [id, planId, title, isDone, assignedTo, dueDate];
 }

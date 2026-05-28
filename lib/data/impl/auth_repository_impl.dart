@@ -2,41 +2,32 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../../domain/models/app_user.dart';
+import '../../domain/repository/auth_repository.dart';
 import '../api/api_client.dart';
+import '../constants/api_url.dart';
+import '../dto/app_user_dto.dart';
 import '../services/realtime_service.dart';
 
-class AuthSession {
-  const AuthSession({
-    required this.user,
-    required this.accessToken,
-    required this.refreshToken,
-  });
-
-  final AppUser user;
-  final String accessToken;
-  final String refreshToken;
-}
-
-class AuthRepository {
-  AuthRepository({
+class AuthRepositoryImpl implements AuthRepository {
+  AuthRepositoryImpl({
     required ApiClient apiClient,
     required RealtimeService realtimeService,
     GoogleSignIn? googleSignIn,
     FirebaseAuth? firebaseAuth,
-    FirebaseMessaging? messaging,
+    FirebaseMessaging? firebaseMessaging,
   }) : _apiClient = apiClient,
        _realtimeService = realtimeService,
-       _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: ['email']),
+       _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-       _messaging = messaging ?? FirebaseMessaging.instance;
+       _firebaseMessaging = firebaseMessaging ?? FirebaseMessaging.instance;
 
   final ApiClient _apiClient;
   final RealtimeService _realtimeService;
   final GoogleSignIn _googleSignIn;
   final FirebaseAuth _firebaseAuth;
-  final FirebaseMessaging _messaging;
+  final FirebaseMessaging _firebaseMessaging;
 
+  @override
   Future<AuthSession?> restoreSession() async {
     final accessToken = await _apiClient.tokenStore.readAccessToken();
     final refreshToken = await _apiClient.tokenStore.readRefreshToken();
@@ -44,8 +35,11 @@ class AuthRepository {
       return null;
     }
 
-    final response = await _apiClient.dio.get<Map<String, dynamic>>('/me');
-    final user = AppUser.fromJson(response.data!);
+    final user = await _apiClient.get(
+      ApiUrl.me,
+      parser: (json) =>
+          AppUserDto.fromJson(json as Map<String, dynamic>).toDomain(),
+    );
     _realtimeService.connect(accessToken);
     await _registerDeviceToken();
     return AuthSession(
@@ -55,15 +49,11 @@ class AuthRepository {
     );
   }
 
+  @override
   Future<AuthSession> signInWithGoogle() async {
-    final account = await _googleSignIn.signIn();
-    if (account == null) {
-      throw StateError('Google sign in was cancelled');
-    }
-
-    final googleAuth = await account.authentication;
+    final account = await _googleSignIn.authenticate();
+    final googleAuth = account.authentication;
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
     final firebaseUser = (await _firebaseAuth.signInWithCredential(
@@ -74,54 +64,64 @@ class AuthRepository {
       throw StateError('Firebase Auth did not return an ID token');
     }
 
-    return _createBackendSession('/auth/firebase', {
+    return _createBackendSession(ApiUrl.authFirebase, {
       'idToken': firebaseIdToken,
     });
   }
 
+  @override
   Future<AuthSession> registerWithPhonePassword({
     required String phone,
     required String password,
     String? name,
   }) {
-    return _createBackendSession('/auth/phone/register', {
+    return _createBackendSession(ApiUrl.authPhoneRegister, {
       'phone': phone,
       'password': password,
       'name': name,
     });
   }
 
+  @override
   Future<AuthSession> loginWithPhonePassword({
     required String phone,
     required String password,
   }) {
-    return _createBackendSession('/auth/phone/login', {
+    return _createBackendSession(ApiUrl.authPhoneLogin, {
       'phone': phone,
       'password': password,
     });
   }
 
+  @override
   Future<void> signOut() async {
-    await _apiClient.dio.post('/auth/logout');
-    await _firebaseAuth.signOut();
-    await _googleSignIn.signOut();
-    await _apiClient.tokenStore.clear();
-    _realtimeService.disconnect();
+    try {
+      await _apiClient.post(ApiUrl.authLogout, parser: (_) => null);
+    } finally {
+      await _firebaseAuth.signOut();
+      await _googleSignIn.signOut();
+      await _apiClient.tokenStore.clear();
+      _realtimeService.disconnect();
+    }
   }
 
   Future<AuthSession> _createBackendSession(
     String path,
     Map<String, dynamic> body,
   ) async {
-    final response = await _apiClient.dio.post<Map<String, dynamic>>(
+    final session = await _apiClient.post(
       path,
       data: body,
-    );
-    final data = response.data!;
-    final session = AuthSession(
-      user: AppUser.fromJson(data['user'] as Map<String, dynamic>),
-      accessToken: data['accessToken'] as String,
-      refreshToken: data['refreshToken'] as String,
+      parser: (json) {
+        final data = json as Map<String, dynamic>;
+        return AuthSession(
+          user: AppUserDto.fromJson(
+            data['user'] as Map<String, dynamic>,
+          ).toDomain(),
+          accessToken: data['accessToken'] as String,
+          refreshToken: data['refreshToken'] as String,
+        );
+      },
     );
 
     await _apiClient.tokenStore.saveTokens(
@@ -134,13 +134,15 @@ class AuthRepository {
   }
 
   Future<void> _registerDeviceToken() async {
-    final token = await _messaging.getToken();
-    if (token == null) {
+    final token = await _firebaseMessaging.getToken();
+    if (token == null || token.isEmpty) {
       return;
     }
-    await _apiClient.dio.post(
-      '/device-tokens',
+
+    await _apiClient.post(
+      ApiUrl.deviceTokens,
       data: {'token': token, 'platform': 'mobile'},
+      parser: (_) => null,
     );
   }
 }

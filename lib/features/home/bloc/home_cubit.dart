@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/repositories/plan_repository.dart';
 import '../../../domain/models/plan.dart';
+import '../../../domain/repository/plan_repository.dart';
 
 class HomeState extends Equatable {
   const HomeState({
