@@ -26,6 +26,7 @@ export 'widgets/text_field_component.dart';
 export 'widgets/toast/app_toast.dart';
 export 'widgets/container/transform_content_container.dart';
 export 'widgets/container/app_container.dart';
+export 'widgets/container/auth_container.dart';
 export 'widgets/default_app_bar.dart';
 export 'widgets/sections/section_widget.dart';
 export 'widgets/sections/toggle_widget.dart';

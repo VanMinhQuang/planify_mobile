@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app_core/app_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:planify_mobile/domain/repository/auth_repository.dart';
 import 'package:planify_mobile/domain/repository/notification_repository.dart';
@@ -19,12 +20,15 @@ class Routes {
   static const profile = "/profile";
 }
 
+final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+
 GoRouter? _routerInstance;
 
 GoRouter createRouter(AuthBloc authBloc) {
   if (_routerInstance != null) return _routerInstance!;
   _routerInstance = GoRouter(
     initialLocation: Routes.signIn,
+    navigatorKey: rootNavigatorKey,
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {
       final status = authBloc.state.status;
