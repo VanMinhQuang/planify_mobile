@@ -30,7 +30,7 @@ export 'package:fl_chart/fl_chart.dart';
 export 'package:flutter_bloc/flutter_bloc.dart';
 export 'package:flutter_easyloading/flutter_easyloading.dart';
 export 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-export 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+export 'package:scroll_to_hide/scroll_to_hide.dart';
 export 'package:flutter_map/flutter_map.dart';
 export 'package:flutter_numeric_text/flutter_numeric_text.dart';
 export 'package:flutter_pdfview/flutter_pdfview.dart';

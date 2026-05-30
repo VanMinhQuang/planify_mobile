@@ -66,7 +66,7 @@ dependencies:
   webview_flutter: ^4.13.0
   open_file: ^3.5.10
   lucide_icons_flutter: ^3.1.13
-  flutter_floating_bottom_bar: ^2.0.0
+  scroll_to_hide: ^2.3.0
   cached_network_image: ^3.4.1
   shimmer_animation: ^2.2.2+1
   fl_chart: ^1.2.0

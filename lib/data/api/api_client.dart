@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:app_core/app_core.dart';
-import 'package:app_core/services/network/sample/restful_token.dart';
 import 'package:planify_mobile/data/dto/app_user_dto.dart';
 
 import 'auth_session.dart';
@@ -106,11 +105,17 @@ class ApiClient {
     required String path,
     required String filePath,
     String fieldName = 'file',
+    Map<String, dynamic> fields = const {},
     Duration timeout = const Duration(seconds: 60),
   }) async {
     try {
       final res = await _service
-          .uploadFile(filePath: filePath, url: path, fieldName: fieldName)
+          .uploadFile(
+            filePath: filePath,
+            url: path,
+            fieldName: fieldName,
+            fields: fields,
+          )
           .timeout(timeout);
 
       final data = res.data;

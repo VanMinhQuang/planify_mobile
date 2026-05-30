@@ -6,7 +6,7 @@ mixin ListBaseMixin<T extends StatefulWidget> on State<T> {
   final ScrollController scrollController = ScrollController();
   bool _hasCalledBottom = false;
 
-  BottomBarController? get bottomBarController => null;
+  ScrollToHideController? get scrollToHideController => null;
 
   @override
   void initState() {
@@ -25,9 +25,9 @@ mixin ListBaseMixin<T extends StatefulWidget> on State<T> {
     final position = scrollController.position;
 
     if (position.userScrollDirection == ScrollDirection.reverse) {
-      bottomBarController?.hide();
+      scrollToHideController?.hide();
     } else if (position.userScrollDirection == ScrollDirection.forward) {
-      bottomBarController?.show();
+      scrollToHideController?.show();
     }
 
     if (position.pixels >= position.maxScrollExtent && !_hasCalledBottom) {

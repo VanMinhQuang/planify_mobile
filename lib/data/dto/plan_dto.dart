@@ -1,3 +1,5 @@
+import 'package:planify_mobile/data/dto/member_dto.dart';
+
 import '../../domain/models/plan.dart';
 
 class PlanDto {
@@ -9,8 +11,14 @@ class PlanDto {
     required this.endDate,
     required this.ownerId,
     required this.isArchived,
+    required this.visibility,
+    required this.isSharedToFeed,
+    required this.commentCount,
+    required this.likeCount,
+    required this.likedByMe,
     this.description,
     this.coverImageUrl,
+    this.members = const [],
   });
 
   final String id;
@@ -22,8 +30,16 @@ class PlanDto {
   final DateTime endDate;
   final String ownerId;
   final bool isArchived;
+  final PlanVisibility visibility;
+  final bool isSharedToFeed;
+  final int commentCount;
+  final int likeCount;
+  final bool likedByMe;
+  final List<MemberDto> members;
 
   factory PlanDto.fromJson(Map<String, dynamic> json) {
+    final count = json['_count'] as Map<String, dynamic>?;
+    final likes = json['likes'] as List<dynamic>? ?? [];
     return PlanDto(
       id: json['id'] as String,
       title: json['title'] as String? ?? '',
@@ -34,6 +50,16 @@ class PlanDto {
       endDate: DateTime.parse(json['endDate'] as String),
       ownerId: json['ownerId'] as String? ?? '',
       isArchived: json['isArchived'] as bool? ?? false,
+      visibility: _visibilityFromApi(json['visibility'] as String?),
+      isSharedToFeed: json['isSharedToFeed'] as bool? ?? false,
+      commentCount: count?['comments'] as int? ?? 0,
+      likeCount: count?['likes'] as int? ?? 0,
+      likedByMe: likes.isNotEmpty,
+      members:
+          (json['members'] as List<dynamic>?)
+              ?.map((item) => MemberDto.fromJson(item as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 
@@ -45,6 +71,8 @@ class PlanDto {
       'coverImageUrl': plan.coverImageUrl,
       'startDate': plan.startDate.toIso8601String(),
       'endDate': plan.endDate.toIso8601String(),
+      'visibility': plan.visibility.name.toUpperCase(),
+      'isSharedToFeed': plan.isSharedToFeed,
     };
   }
 
@@ -59,6 +87,11 @@ class PlanDto {
       endDate: endDate,
       ownerId: ownerId,
       isArchived: isArchived,
+      visibility: visibility,
+      isSharedToFeed: isSharedToFeed,
+      commentCount: commentCount,
+      likeCount: likeCount,
+      likedByMe: likedByMe,
     );
   }
 
@@ -66,6 +99,13 @@ class PlanDto {
     return PlanCategory.values.firstWhere(
       (category) => category.name.toUpperCase() == value,
       orElse: () => PlanCategory.personal,
+    );
+  }
+
+  static PlanVisibility _visibilityFromApi(String? value) {
+    return PlanVisibility.values.firstWhere(
+      (visibility) => visibility.name.toUpperCase() == value,
+      orElse: () => PlanVisibility.private,
     );
   }
 }

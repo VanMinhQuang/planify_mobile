@@ -2,7 +2,6 @@ import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:planify_mobile/app/router.dart';
-import 'package:app_core/ui/theme.dart';
 import 'package:planify_mobile/features/sign_up/bloc/sign_up_bloc.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -29,9 +28,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
+    return AuthContainer(
+      actions: [
+        IconButton(
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -41,122 +40,118 @@ class _SignUpScreenState extends State<SignUpScreen> {
           },
           icon: const Icon(LucideIcons.arrowLeft),
         ),
-        title: const Text('Dang ky'),
-      ),
-      body: SafeArea(
-        child: BlocConsumer<SignUpBloc, SignUpState>(
-          listener: (context, state) {
-            switch (state.status) {
-              case SignUpStatus.success:
-                LoadingDialog.hide(context);
-                CustomToast.showSuccess(
-                  context: context,
-                  message: 'Dang ky thanh cong',
-                );
-                context.go(Routes.signIn);
-                break;
-              case SignUpStatus.failure:
-                LoadingDialog.hide(context);
-                AppWarningDialog.show(
-                  context: context,
-                  message: state.message ?? '',
-                );
-                break;
-              case SignUpStatus.loading:
-                LoadingDialog.show(context);
-                break;
-              default:
-                break;
-            }
-          },
-          builder: (context, state) {
-            final isLoading = state.status == SignUpStatus.loading;
-            return Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.all(24),
-                children: [
-                  Text('Tao tai khoan', style: context.bold24()),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Bat dau lap ke hoach thong minh cung Planify.',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  TextFormFieldComponent(
-                    controller: _nameController,
-                    titleText: 'Ho ten',
-                    placeholder: 'Nhap ho ten',
-                    isRequired: true,
-                    validator: (value) => value == null || value.isEmpty
-                        ? 'Vui long nhap ho ten'
-                        : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormFieldComponent(
-                    controller: _phoneController,
-                    titleText: 'So dien thoai',
-                    placeholder: 'Nhap so dien thoai',
-                    keyboardType: TextInputType.phone,
-                    isRequired: true,
-                    validator: (value) => value == null || value.isEmpty
-                        ? 'Vui long nhap so dien thoai'
-                        : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormFieldComponent(
-                    controller: _passwordController,
-                    titleText: 'Mat khau',
-                    placeholder: 'Nhap mat khau',
-                    isPassword: true,
-                    obscureText: _obscurePassword,
-                    isRequired: true,
-                    onToggleObscure: () {
-                      setState(() => _obscurePassword = !_obscurePassword);
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Vui long nhap mat khau';
-                      }
-                      if (value.length < 6) {
-                        return 'Mat khau phai co it nhat 6 ky tu';
-                      }
-                      return null;
-                    },
-                  ),
+      ],
+      child: BlocConsumer<SignUpBloc, SignUpState>(
+        listener: (context, state) {
+          switch (state.status) {
+            case SignUpStatus.success:
+              LoadingDialog.hide(context);
+              CustomToast.showSuccess(
+                context: context,
+                message: 'Dang ky thanh cong',
+              );
+              context.go(Routes.signIn);
+              break;
+            case SignUpStatus.failure:
+              LoadingDialog.hide(context);
+              AppWarningDialog.show(
+                context: context,
+                message: state.message ?? '',
+              );
+              break;
+            case SignUpStatus.loading:
+              LoadingDialog.show(context);
+              break;
+            default:
+              break;
+          }
+        },
+        builder: (context, state) {
+          final isLoading = state.status == SignUpStatus.loading;
+          return Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(24),
+              children: [
+                Text('Tao tai khoan', style: context.bold24()),
+                const SizedBox(height: 8),
+                Text(
+                  'Bat dau lap ke hoach thong minh cung Planify.',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 16),
 
-                  const SizedBox(height: 24),
-                  AppButton(
-                    onTap: isLoading ? null : _submit,
-                    isDisabled: isLoading,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: 10.w,
-                      children: [
-                        if (isLoading)
-                          SizedBox.square(
-                            dimension: 18.w,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColor.white,
-                            ),
-                          )
-                        else
-                          const Icon(
-                            LucideIcons.userPlus,
+                TextFormFieldComponent(
+                  controller: _nameController,
+                  titleText: 'Ho ten',
+                  placeholder: 'Nhap ho ten',
+                  isRequired: true,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Vui long nhap ho ten'
+                      : null,
+                ),
+                const SizedBox(height: 8),
+                TextFormFieldComponent(
+                  controller: _phoneController,
+                  titleText: 'So dien thoai',
+                  placeholder: 'Nhap so dien thoai',
+                  keyboardType: TextInputType.phone,
+                  isRequired: true,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Vui long nhap so dien thoai'
+                      : null,
+                ),
+                const SizedBox(height: 8),
+                TextFormFieldComponent(
+                  controller: _passwordController,
+                  titleText: 'Mat khau',
+                  placeholder: 'Nhap mat khau',
+                  isPassword: true,
+                  obscureText: _obscurePassword,
+                  isRequired: true,
+                  onToggleObscure: () {
+                    setState(() => _obscurePassword = !_obscurePassword);
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Vui long nhap mat khau';
+                    }
+                    if (value.length < 6) {
+                      return 'Mat khau phai co it nhat 6 ky tu';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 24),
+                AppButton(
+                  onTap: isLoading ? null : _submit,
+                  isDisabled: isLoading,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 10.w,
+                    children: [
+                      if (isLoading)
+                        SizedBox.square(
+                          dimension: 18.w,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
                             color: AppColor.white,
                           ),
-                        Text(
-                          'Dang ky',
-                          style: context.bold14(color: AppColor.white),
-                        ),
-                      ],
-                    ),
+                        )
+                      else
+                        const Icon(LucideIcons.userPlus, color: AppColor.white),
+                      Text(
+                        'Dang ky',
+                        style: context.bold14(color: AppColor.white),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

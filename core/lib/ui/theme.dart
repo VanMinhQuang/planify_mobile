@@ -109,6 +109,24 @@ class PlanifyTheme {
           ),
         ),
       ),
+
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: cardColor,
+        selectedItemColor: scheme.primary,
+        unselectedItemColor: scheme.onSurfaceVariant,
+        selectedLabelStyle: textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppColor.planifyLavender,
+        ),
+        unselectedLabelStyle: textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w400,
+        ),
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        enableFeedback: false,
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+      ),
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:app_core/app_core.dart';
 import 'package:planify_mobile/data/api/auth_session.dart';
-import 'package:planify_mobile/data/dto/app_user_dto.dart';
 import 'package:planify_mobile/domain/models/app_user.dart';
 
 import '../../domain/repository/auth_repository.dart';

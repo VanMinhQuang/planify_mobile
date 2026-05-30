@@ -27,10 +27,12 @@ abstract class RestApiClient extends AbstractNetworkClient {
     required String filePath,
     required String url,
     String fieldName = 'file',
+    Map<String, dynamic> fields = const {},
   }) async {
     final fileName = filePath.split('/').last;
 
     final formData = FormData.fromMap({
+      ...fields,
       fieldName: await MultipartFile.fromFile(filePath, filename: fileName),
     });
 

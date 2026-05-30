@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 
 import '../di/injection.dart';
 import '../domain/repository/auth_repository.dart';
+import '../domain/repository/comment_repository.dart';
+import '../domain/repository/feed_repository.dart';
+import '../domain/repository/like_repository.dart';
 import '../domain/repository/notification_repository.dart';
 import '../domain/repository/plan_repository.dart';
+import '../domain/repository/profile_repository.dart';
 import '../domain/repository/upload_repository.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import 'router.dart';
@@ -37,6 +41,10 @@ class _PlanifyAppState extends State<PlanifyApp> {
               providers: [
                 RepositoryProvider.value(value: getIt<AuthRepository>()),
                 RepositoryProvider.value(value: getIt<PlanRepository>()),
+                RepositoryProvider.value(value: getIt<FeedRepository>()),
+                RepositoryProvider.value(value: getIt<CommentRepository>()),
+                RepositoryProvider.value(value: getIt<LikeRepository>()),
+                RepositoryProvider.value(value: getIt<ProfileRepository>()),
                 RepositoryProvider.value(
                   value: getIt<NotificationRepository>(),
                 ),

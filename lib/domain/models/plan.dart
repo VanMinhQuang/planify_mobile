@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 
 enum PlanCategory { travel, event, work, personal }
 
+enum PlanVisibility { private, friends, public }
+
 class Plan extends Equatable {
   const Plan({
     required this.id,
@@ -13,6 +15,11 @@ class Plan extends Equatable {
     this.description,
     this.coverImageUrl,
     this.isArchived = false,
+    this.visibility = PlanVisibility.private,
+    this.isSharedToFeed = false,
+    this.commentCount = 0,
+    this.likeCount = 0,
+    this.likedByMe = false,
   });
 
   final String id;
@@ -24,6 +31,11 @@ class Plan extends Equatable {
   final DateTime endDate;
   final String ownerId;
   final bool isArchived;
+  final PlanVisibility visibility;
+  final bool isSharedToFeed;
+  final int commentCount;
+  final int likeCount;
+  final bool likedByMe;
 
   @override
   List<Object?> get props => [
@@ -36,5 +48,10 @@ class Plan extends Equatable {
     endDate,
     ownerId,
     isArchived,
+    visibility,
+    isSharedToFeed,
+    commentCount,
+    likeCount,
+    likedByMe,
   ];
 }

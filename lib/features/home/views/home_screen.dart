@@ -1,146 +1,100 @@
 import 'package:app_core/app_core.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:planify_mobile/features/features.dart';
 
-import '../../../app/theme_controller.dart';
-import '../../../domain/models/plan.dart';
-import '../bloc/home_cubit.dart';
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Planify'),
-        actions: [
-          ThemeToggleButton(
-            themeMode: PlanifyThemeScope.of(context).themeMode,
-            onChanged: PlanifyThemeScope.of(context).setThemeMode,
-          ),
-          IconButton(
-            tooltip: 'Calendar',
-            onPressed: () => context.push('/calendar'),
-            icon: const Icon(Icons.calendar_month_outlined),
-          ),
-          IconButton(
-            tooltip: 'Notifications',
-            onPressed: () => context.push('/notifications'),
-            icon: const Icon(Icons.notifications_outlined),
-          ),
-          IconButton(
-            tooltip: 'Profile',
-            onPressed: () => context.push('/profile'),
-            icon: const Icon(Icons.person_outline),
-          ),
-        ],
-      ),
-      body: Container(
-        decoration: BoxDecoration(gradient: context.gradients.background),
-        child: BlocBuilder<HomeCubit, HomeState>(
-          builder: (context, state) {
-            if (state.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state.plans.isEmpty) {
-              return const _EmptyHome();
-            }
-            return RefreshIndicator(
-              onRefresh: () => context.read<HomeCubit>().load(),
-              child: ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemBuilder: (context, index) =>
-                    _PlanCard(plan: state.plans[index]),
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemCount: state.plans.length,
-              ),
-            );
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/plans/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('Plan'),
-      ),
-    );
-  }
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _PlanCard extends StatelessWidget {
-  const _PlanCard({required this.plan});
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late final ScrollToHideController _hideController;
+  late final TabController _tabController;
 
-  final Plan plan;
+  @override
+  void initState() {
+    super.initState();
+    _hideController = ScrollToHideController();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final formatter = DateFormat.MMMd();
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.go('/plans/${plan.id}'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (plan.coverImageUrl != null)
-              AspectRatio(
-                aspectRatio: 16 / 7,
-                child: CachedNetworkImage(
-                  imageUrl: plan.coverImageUrl!,
-                  fit: BoxFit.cover,
+    final avatarUrl = context.select(
+      (AuthBloc bloc) => bloc.state.user?.avatarUrl,
+    );
+    return HomeContainer(
+      hideController: _hideController,
+      bottomNavBar: BlocBuilder<HomeCubit, HomeState>(
+        buildWhen: (previous, current) => previous.index != current.index,
+        builder: (context, state) {
+          return NavigationBar(
+            selectedIndex: state.index,
+            onDestinationSelected: (value) {
+              context.read<HomeCubit>().changeIndex(value);
+              _tabController.animateTo(value);
+            },
+            destinations: [
+              const NavigationDestination(
+                icon: Icon(Icons.dynamic_feed_outlined),
+                selectedIcon: Icon(Icons.dynamic_feed),
+                label: 'Feed',
+              ),
+              const NavigationDestination(
+                icon: Icon(Icons.calendar_month_outlined),
+                selectedIcon: Icon(Icons.calendar_month),
+                label: 'Calendar',
+              ),
+              NavigationDestination(
+                icon: _AvatarNavIcon(avatarUrl: avatarUrl),
+                selectedIcon: _AvatarNavIcon(
+                  avatarUrl: avatarUrl,
+                  isSelected: true,
                 ),
+                label: 'User',
               ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    plan.title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${formatter.format(plan.startDate)} - ${formatter.format(plan.endDate)}',
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
+      ),
+      child: TabBarView(
+        controller: _tabController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: const [FeedScreen(), CalendarScreen(), ProfileScreen()],
       ),
     );
   }
 }
 
-class _EmptyHome extends StatelessWidget {
-  const _EmptyHome();
+class _AvatarNavIcon extends StatelessWidget {
+  const _AvatarNavIcon({this.avatarUrl, this.isSelected = false});
+
+  final String? avatarUrl;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.event_note_outlined,
-              size: 56,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No upcoming plans yet',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            const Text('Create a trip, event, or weekly plan to get started.'),
-          ],
-        ),
+    final hasAvatar = avatarUrl != null && avatarUrl!.isNotEmpty;
+    return Container(
+      padding: EdgeInsets.all(isSelected ? 2 : 0),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: isSelected
+            ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
+            : null,
+      ),
+      child: CircleAvatar(
+        radius: 12,
+        backgroundImage: hasAvatar ? NetworkImage(avatarUrl!) : null,
+        child: hasAvatar ? null : const Icon(Icons.person_outline, size: 18),
       ),
     );
   }

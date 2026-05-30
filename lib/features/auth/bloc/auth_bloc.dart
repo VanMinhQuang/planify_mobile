@@ -12,6 +12,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     : _authRepository = authRepository,
       super(const AuthState()) {
     on<AuthStarted>(_onStarted);
+    on<AuthUserChanged>(_onUserChanged);
     on<AuthGoogleSignInRequested>(_onGoogleSignIn);
     on<AuthSignOutRequested>(_onSignOut);
     on<AuthPhone>(_onPhone);
@@ -21,6 +22,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   final AuthRepository _authRepository;
+
+  void _onUserChanged(AuthUserChanged event, Emitter<AuthState> emit) {
+    emit(state.copyWith(user: event.user));
+  }
 
   Future<void> _onStarted(AuthStarted event, Emitter<AuthState> emit) async {}
 
@@ -40,7 +45,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _onChangeObsecure(ChangeObsecure event, Emitter<AuthState> emit) {
-    emit(state.copyWith(isObsecure: !state.isObsecure));
+    emit(
+      state.copyWith(
+        isObsecure: !state.isObsecure,
+        status: AuthStatus.unauthenticated,
+      ),
+    );
   }
 
   Future<void> _onPhone(AuthPhone event, Emitter<AuthState> emit) async {

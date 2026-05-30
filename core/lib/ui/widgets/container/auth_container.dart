@@ -40,22 +40,19 @@ class AuthContainer extends StatelessWidget {
           },
           child: Container(
             padding:
-                padding ?? EdgeInsets.only(left: 16.h, right: 16.h, top: 40.v),
-            decoration: BoxDecoration(gradient: context.planifyGradients.primary),
+                padding ?? EdgeInsets.only(left: 16.w, right: 16.w, top: 40.h),
+            decoration: BoxDecoration(
+              gradient: context.planifyGradients.surface,
+            ),
             child: Column(
-              spacing: 40.v,
+              spacing: 40.h,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.only(top: 16.v),
+                  padding: EdgeInsets.only(top: 16.h),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Image.asset(
-                        Assets.logo.logoNoBackground.path,
-                        height: 40.v,
-                        fit: BoxFit.contain,
-                      ),
                       if (actions != null && actions!.isNotEmpty)
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -68,17 +65,6 @@ class AuthContainer extends StatelessWidget {
                   ),
                 ),
                 Expanded(child: child),
-
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15.v),
-                    child: Text(
-                      '${LocaleKeys.version.tr()}: ${versionApp ?? ''} (${versionCode ?? ''})',
-                      style: AppTextStyles.normal12(),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

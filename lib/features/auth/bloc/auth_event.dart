@@ -13,6 +13,15 @@ class AuthGoogleSignInRequested extends AuthEvent {}
 
 class AuthSignOutRequested extends AuthEvent {}
 
+class AuthUserChanged extends AuthEvent {
+  const AuthUserChanged(this.user);
+
+  final AppUser user;
+
+  @override
+  List<Object?> get props => [user];
+}
+
 class AuthPhone extends AuthEvent {}
 
 class ChangePhone extends AuthEvent {

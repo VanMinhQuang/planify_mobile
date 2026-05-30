@@ -115,6 +115,25 @@ class _OverviewTab extends StatelessWidget {
                       ? 'No description yet.'
                       : plan.description!,
                 ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(
+                      plan.likedByMe
+                          ? Icons.favorite
+                          : Icons.favorite_border_outlined,
+                      color: plan.likedByMe
+                          ? Theme.of(context).colorScheme.error
+                          : null,
+                    ),
+                    const SizedBox(width: 6),
+                    Text('${plan.likeCount} likes'),
+                    const SizedBox(width: 18),
+                    const Icon(Icons.mode_comment_outlined),
+                    const SizedBox(width: 6),
+                    Text('${plan.commentCount} comments'),
+                  ],
+                ),
               ],
             ),
           ),

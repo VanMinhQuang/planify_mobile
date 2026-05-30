@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
-
 import '../../domain/models/plan.dart';
 import '../../domain/repository/upload_repository.dart';
 import '../api/api_client.dart';
@@ -22,7 +20,23 @@ class UploadRepositoryImpl implements UploadRepository {
     if (mode != 'iis' && mode != 'r2') {
       throw UnsupportedError('Unsupported upload mode: $mode');
     }
-    return _uploadMultipart(ApiUrl.upload(mode), planId, file);
+    return _uploadMultipart(
+      ApiUrl.upload(mode),
+      file,
+      fields: {'kind': 'PLAN_COVER', 'planId': planId},
+    );
+  }
+
+  @override
+  Future<String> uploadAvatar({required File file, String mode = 'iis'}) async {
+    if (mode != 'iis' && mode != 'r2') {
+      throw UnsupportedError('Unsupported upload mode: $mode');
+    }
+    return _uploadMultipart(
+      ApiUrl.upload(mode),
+      file,
+      fields: {'kind': 'AVATAR'},
+    );
   }
 
   @override
@@ -43,21 +57,20 @@ class UploadRepositoryImpl implements UploadRepository {
     }
   }
 
-  Future<String> _uploadMultipart(String path, String planId, File file) async {
-    return '';
-    // final formData = FormData.fromMap({
-    //   'kind': 'PLAN_COVER',
-    //   'planId': planId,
-    //   'file': await MultipartFile.fromFile(
-    //     file.path,
-    //     filename: file.uri.pathSegments.last,
-    //   ),
-    // });
-    // final response = await _apiClient.post(
-    //   path,
-    //   data: formData,
-    //   parser: (json) => json as Map<String, dynamic>,
-    // );
-    // return response['publicUrl'] as String;
+  Future<String> _uploadMultipart(
+    String path,
+    File file, {
+    required Map<String, dynamic> fields,
+  }) async {
+    final response = await _apiClient.uploadFile<Map<String, dynamic>>(
+      path: path,
+      filePath: file.path,
+      fields: fields,
+    );
+    final publicUrl = response?['publicUrl'] as String?;
+    if (publicUrl == null || publicUrl.isEmpty) {
+      throw 'Upload failed';
+    }
+    return publicUrl;
   }
 }

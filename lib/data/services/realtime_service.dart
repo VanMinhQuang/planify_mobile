@@ -26,6 +26,8 @@ class RealtimeService {
 
     for (final event in [
       'plan:updated',
+      'plan:liked',
+      'plan:unliked',
       'task:created',
       'task:updated',
       'task:deleted',
@@ -34,7 +36,13 @@ class RealtimeService {
       'note:deleted',
       'member:joined',
       'member:removed',
+      'member:updated',
       'activity:created',
+      'feed:plan_shared',
+      'comment:created',
+      'comment:deleted',
+      'friend:request_created',
+      'friend:request_accepted',
     ]) {
       _socket!.on(event, (payload) {
         _events.add({'event': event, 'payload': payload});

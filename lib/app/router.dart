@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:app_core/app_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:planify_mobile/domain/repository/auth_repository.dart';
+import 'package:planify_mobile/domain/repository/feed_repository.dart';
+import 'package:planify_mobile/domain/repository/like_repository.dart';
 import 'package:planify_mobile/domain/repository/notification_repository.dart';
 import 'package:planify_mobile/domain/repository/plan_repository.dart';
+import 'package:planify_mobile/domain/repository/profile_repository.dart';
+import 'package:planify_mobile/domain/repository/upload_repository.dart';
 import 'package:planify_mobile/features/features.dart';
 
 class Routes {
@@ -18,6 +21,9 @@ class Routes {
   static const calendar = "/calendar";
   static const notifications = "/notifications";
   static const profile = "/profile";
+  static const settings = "/settings";
+
+  static String planDetailPath(String planId) => '/plans/$planId';
 }
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -62,9 +68,26 @@ GoRouter createRouter(AuthBloc authBloc) {
       ),
       GoRoute(
         path: Routes.home,
-        builder: (context, state) => BlocProvider(
-          create: (context) =>
-              HomeCubit(planRepository: context.read<PlanRepository>())..load(),
+        builder: (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => HomeCubit()),
+            BlocProvider(
+              create: (context) => FeedCubit(
+                feedRepository: context.read<FeedRepository>(),
+                likeRepository: context.read<LikeRepository>(),
+              ),
+            ),
+            BlocProvider(
+              create: (context) =>
+                  CalendarCubit(planRepository: context.read<PlanRepository>()),
+            ),
+            BlocProvider(
+              create: (context) => ProfileCubit(
+                profileRepository: context.read<ProfileRepository>(),
+                uploadRepository: context.read<UploadRepository>(),
+              ),
+            ),
+          ],
           child: const HomeScreen(),
         ),
       ),
@@ -83,7 +106,11 @@ GoRouter createRouter(AuthBloc authBloc) {
       ),
       GoRoute(
         path: Routes.calendar,
-        builder: (context, state) => const CalendarScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) =>
+              CalendarCubit(planRepository: context.read<PlanRepository>()),
+          child: const CalendarScreen(),
+        ),
       ),
       GoRoute(
         path: Routes.notifications,
@@ -96,7 +123,17 @@ GoRouter createRouter(AuthBloc authBloc) {
       ),
       GoRoute(
         path: Routes.profile,
-        builder: (context, state) => const ProfileScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) => ProfileCubit(
+            profileRepository: context.read<ProfileRepository>(),
+            uploadRepository: context.read<UploadRepository>(),
+          ),
+          child: const ProfileScreen(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.settings,
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );
