@@ -1,8 +1,17 @@
+import 'package:app_core/app_core.dart';
+import 'package:app_core/ui/widgets/container/app_container.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:planify_mobile/features/plan/detail/view/tabs/overview_tab.dart';
+import 'package:planify_mobile/features/plan/detail/widgets/modal/friend_modal.dart';
+import 'package:planify_mobile/features/plan/widgets/comment_tile.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../domain/models/plan_task.dart';
+import '../../../../domain/models/app_user.dart';
+import '../../../../domain/models/plan_comment.dart';
+import '../../../../domain/models/plan_task.dart';
+import '../../../auth/bloc/auth_bloc.dart';
 import '../bloc/plan_detail_cubit.dart';
 
 class PlanDetailScreen extends StatefulWidget {
@@ -17,11 +26,13 @@ class _PlanDetailScreenState extends State<PlanDetailScreen>
   late final TabController _tabController;
   final _taskController = TextEditingController();
   final _noteController = TextEditingController();
+  late PlanDetailCubit bloc;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    bloc = context.read<PlanDetailCubit>();
   }
 
   @override
@@ -36,109 +47,68 @@ class _PlanDetailScreenState extends State<PlanDetailScreen>
   Widget build(BuildContext context) {
     return BlocConsumer<PlanDetailCubit, PlanDetailState>(
       listenWhen: (previous, current) =>
-          previous.inviteUrl != current.inviteUrl,
+          previous.inviteUrl != current.inviteUrl ||
+          previous.message != current.message,
       listener: (context, state) {
         final inviteUrl = state.inviteUrl;
         if (inviteUrl != null) {
           SharePlus.instance.share(ShareParams(text: inviteUrl));
         }
+        final message = state.message;
+        if (message != null && message.isNotEmpty) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(message)));
+        }
       },
       builder: (context, state) {
         final plan = state.plan;
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(plan?.title ?? 'Plan'),
-            actions: [
-              IconButton(
-                tooltip: 'Invite',
-                onPressed: plan == null
-                    ? null
-                    : () => context.read<PlanDetailCubit>().createInvite(),
-                icon: const Icon(Icons.person_add_alt_1_outlined),
-              ),
-            ],
-            bottom: TabBar(
-              controller: _tabController,
-              tabs: const [
-                Tab(text: 'Overview'),
-                Tab(text: 'Tasks'),
-                Tab(text: 'Notes'),
-                Tab(text: 'Activity'),
-              ],
-            ),
+        final currentUserId = context.select(
+          (AuthBloc bloc) => bloc.state.user?.id,
+        );
+        final canViewMemberContent = state.canViewMemberContent(currentUserId);
+        return AppContainer(
+          isFullScreen: true,
+          appBarTitle: plan?.title ?? 'Plan',
+          iconRight: IconButton(
+            tooltip: 'Invite',
+            onPressed:
+                plan == null || !canViewMemberContent || state.isCreatingInvite
+                ? null
+                : () => _showInviteSheet(context, state),
+            icon: const Icon(Icons.person_add_alt_1_outlined),
           ),
-          body: state.isLoading
+          child: state.isLoading
               ? const Center(child: CircularProgressIndicator())
-              : TabBarView(
+              : canViewMemberContent
+              ? TabBarView(
                   controller: _tabController,
                   children: [
-                    _OverviewTab(state: state),
+                    OverviewTab(state: state),
                     _TasksTab(controller: _taskController),
                     _NotesTab(controller: _noteController),
                     _ActivityTab(state: state),
                   ],
-                ),
+                )
+              : OverviewTab(state: state),
         );
       },
     );
   }
-}
 
-class _OverviewTab extends StatelessWidget {
-  const _OverviewTab({required this.state});
-
-  final PlanDetailState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final plan = state.plan;
-    if (plan == null) {
-      return const Center(child: Text('Plan not found'));
+  Future<void> _showInviteSheet(
+    BuildContext context,
+    PlanDetailState state,
+  ) async {
+    if (state.friends.isEmpty && !state.isLoadingFriends) {
+      bloc.refreshFriends();
     }
-    final daysLeft = plan.startDate.difference(DateTime.now()).inDays;
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  daysLeft <= 0 ? 'Starting soon' : '$daysLeft days to go',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  plan.description?.isEmpty ?? true
-                      ? 'No description yet.'
-                      : plan.description!,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Icon(
-                      plan.likedByMe
-                          ? Icons.favorite
-                          : Icons.favorite_border_outlined,
-                      color: plan.likedByMe
-                          ? Theme.of(context).colorScheme.error
-                          : null,
-                    ),
-                    const SizedBox(width: 6),
-                    Text('${plan.likeCount} likes'),
-                    const SizedBox(width: 18),
-                    const Icon(Icons.mode_comment_outlined),
-                    const SizedBox(width: 6),
-                    Text('${plan.commentCount} comments'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+
+    await SheetUtils.openCustomBottomSheet(
+      context: context,
+      builder: (sheetContext) {
+        return FriendModal(bloc: bloc);
+      },
     );
   }
 }

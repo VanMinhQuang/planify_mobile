@@ -4,6 +4,7 @@ import 'package:app_core/app_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class CommonUtils {
@@ -107,79 +108,266 @@ class CommonUtils {
     DateTime? lastDate,
   }) async {
     final now = DateTime.now();
-    final DateTime initDate = initialDate ?? now;
     final DateTime startDate = firstDate ?? DateTime(now.year - 100);
     final DateTime endDate = lastDate ?? DateTime(now.year + 100);
+    final DateTime initDate = _clampDate(
+      initialDate ?? now,
+      startDate,
+      endDate,
+    );
+    DateTime selectedDate = DateTime(
+      initDate.year,
+      initDate.month,
+      initDate.day,
+    );
 
-    if (Platform.isIOS) {
-      DateTime selectedDate = initDate;
-
-      return await showCupertinoModalPopup<DateTime>(
-        context: context,
-        builder: (popupContext) => Container(
-          height: 300,
-          color: Colors.white,
-          child: Column(
-            children: [
-              Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.all(12),
-                child: TextButton(
-                  child: Text("Xong", style: AppTextStyles.bold16()),
-                  onPressed: () {
-                    Navigator.of(popupContext).pop(
-                      DateTime(
-                        selectedDate.year,
-                        selectedDate.month,
-                        selectedDate.day,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Expanded(
-                child: CupertinoDatePicker(
-                  initialDateTime: initDate,
-                  minimumDate: startDate,
-                  maximumDate: endDate,
-                  onDateTimeChanged: (DateTime date) {
-                    selectedDate = date;
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    } else {
-      // Material DatePicker
-      return await showDatePicker(
-        context: context,
-        initialDate: initDate,
-        firstDate: startDate,
-        lastDate: endDate,
-        fieldHintText: 'dd/mm/yyyy',
-        builder: (context, child) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: ColorScheme.light(
-                primary: AppColor.primary,
-                onPrimary: Colors.white,
-                onSurface: AppColor.primary,
-              ),
-              textButtonTheme: TextButtonThemeData(
-                style: TextButton.styleFrom(
-                  textStyle: AppTextStyles.semiBold14(color: AppColor.white),
-                  foregroundColor: AppColor.primary,
-                  elevation: 4,
-                ),
-              ),
+    return showModalBottomSheet<DateTime>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final colors = context.colors;
+        return SafeArea(
+          child: Container(
+            height: 460.h,
+            margin: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(24.sp),
             ),
-            child: child!,
-          );
-        },
-      );
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 12.w, 8.h),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Select date',
+                          style: context.bold18(color: colors.onSurface),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        icon: Icon(Icons.close, color: colors.onSurface),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SfDateRangePicker(
+                    initialSelectedDate: selectedDate,
+                    minDate: startDate,
+                    maxDate: endDate,
+                    selectionMode: DateRangePickerSelectionMode.single,
+                    backgroundColor: colors.surface,
+                    headerStyle: DateRangePickerHeaderStyle(
+                      textAlign: TextAlign.center,
+                      backgroundColor: colors.surface,
+                      textStyle: context.bold16(color: colors.primary),
+                    ),
+                    monthCellStyle: DateRangePickerMonthCellStyle(
+                      textStyle: context.normal14(color: colors.onSurface),
+                      todayTextStyle: context.bold14(color: colors.primary),
+                      disabledDatesTextStyle: context.normal14(
+                        color: colors.onSurfaceVariant.withAlpha(120),
+                      ),
+                    ),
+                    monthViewSettings: const DateRangePickerMonthViewSettings(
+                      firstDayOfWeek: 1,
+                    ),
+                    todayHighlightColor: colors.primary,
+                    selectionColor: colors.primary,
+                    selectionTextStyle: context.bold14(color: colors.onPrimary),
+                    onSelectionChanged: (args) {
+                      final value = args.value;
+                      if (value is DateTime) {
+                        selectedDate = DateTime(
+                          value.year,
+                          value.month,
+                          value.day,
+                        );
+                      }
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () =>
+                              Navigator.of(sheetContext).pop(selectedDate),
+                          child: const Text('Done'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static DateTime _clampDate(DateTime date, DateTime min, DateTime max) {
+    if (date.isBefore(min)) {
+      return min;
     }
+    if (date.isAfter(max)) {
+      return max;
+    }
+    return date;
+  }
+
+  static Future<DateTimeRange?> showAdaptiveDateRangePicker({
+    required BuildContext context,
+    DateTime? initialStartDate,
+    DateTime? initialEndDate,
+    DateTime? firstDate,
+    DateTime? lastDate,
+  }) async {
+    final now = DateTime.now();
+    final DateTime startDate = firstDate ?? DateTime(now.year - 100);
+    final DateTime endDate = lastDate ?? DateTime(now.year + 100);
+    final DateTime initStartDate = _dateOnly(
+      _clampDate(initialStartDate ?? now, startDate, endDate),
+    );
+    final DateTime initEndDate = _dateOnly(
+      _clampDate(
+        initialEndDate ?? initStartDate.add(const Duration(days: 1)),
+        startDate,
+        endDate,
+      ),
+    );
+    PickerDateRange selectedRange = PickerDateRange(
+      initStartDate,
+      initEndDate.isBefore(initStartDate) ? initStartDate : initEndDate,
+    );
+
+    return showModalBottomSheet<DateTimeRange>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final colors = context.colors;
+        return SafeArea(
+          child: Container(
+            height: 500.h,
+            margin: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(24.sp),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 12.w, 8.h),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Select date range',
+                          style: context.bold18(color: colors.onSurface),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        icon: Icon(Icons.close, color: colors.onSurface),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SfDateRangePicker(
+                    initialSelectedRange: selectedRange,
+                    minDate: startDate,
+                    maxDate: endDate,
+                    selectionMode: DateRangePickerSelectionMode.range,
+                    backgroundColor: colors.surface,
+                    headerStyle: DateRangePickerHeaderStyle(
+                      textAlign: TextAlign.center,
+                      backgroundColor: colors.surface,
+                      textStyle: context.bold16(color: colors.primary),
+                    ),
+                    monthCellStyle: DateRangePickerMonthCellStyle(
+                      textStyle: context.normal14(color: colors.onSurface),
+                      todayTextStyle: context.bold14(color: colors.primary),
+                      disabledDatesTextStyle: context.normal14(
+                        color: colors.onSurfaceVariant.withAlpha(120),
+                      ),
+                    ),
+                    monthViewSettings: const DateRangePickerMonthViewSettings(
+                      firstDayOfWeek: 1,
+                    ),
+                    todayHighlightColor: colors.primary,
+                    startRangeSelectionColor: colors.primary,
+                    endRangeSelectionColor: colors.primary,
+                    rangeSelectionColor: colors.primary.withAlpha(40),
+                    selectionTextStyle: context.bold14(color: colors.onPrimary),
+                    rangeTextStyle: context.semiBold14(color: colors.onSurface),
+                    onSelectionChanged: (args) {
+                      final value = args.value;
+                      if (value is PickerDateRange) {
+                        selectedRange = value;
+                      }
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () {
+                            final pickedStart = selectedRange.startDate;
+                            final pickedEnd =
+                                selectedRange.endDate ?? pickedStart;
+                            if (pickedStart == null || pickedEnd == null) {
+                              Navigator.of(sheetContext).pop();
+                              return;
+                            }
+                            Navigator.of(sheetContext).pop(
+                              DateTimeRange(
+                                start: _dateOnly(pickedStart),
+                                end: _dateOnly(pickedEnd),
+                              ),
+                            );
+                          },
+                          child: const Text('Done'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 
   static Future<int?> showAdaptiveYearPicker({

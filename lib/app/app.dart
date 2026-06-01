@@ -1,10 +1,12 @@
 import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
+import 'package:planify_mobile/features/features.dart';
 
 import '../di/injection.dart';
 import '../domain/repository/auth_repository.dart';
 import '../domain/repository/comment_repository.dart';
 import '../domain/repository/feed_repository.dart';
+import '../domain/repository/friend_repository.dart';
 import '../domain/repository/like_repository.dart';
 import '../domain/repository/notification_repository.dart';
 import '../domain/repository/plan_repository.dart';
@@ -42,6 +44,7 @@ class _PlanifyAppState extends State<PlanifyApp> {
                 RepositoryProvider.value(value: getIt<AuthRepository>()),
                 RepositoryProvider.value(value: getIt<PlanRepository>()),
                 RepositoryProvider.value(value: getIt<FeedRepository>()),
+                RepositoryProvider.value(value: getIt<FriendRepository>()),
                 RepositoryProvider.value(value: getIt<CommentRepository>()),
                 RepositoryProvider.value(value: getIt<LikeRepository>()),
                 RepositoryProvider.value(value: getIt<ProfileRepository>()),
@@ -50,10 +53,20 @@ class _PlanifyAppState extends State<PlanifyApp> {
                 ),
                 RepositoryProvider.value(value: getIt<UploadRepository>()),
               ],
-              child: BlocProvider(
-                create: (context) =>
-                    AuthBloc(authRepository: context.read<AuthRepository>())
-                      ..add(AuthStarted()),
+              child: MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (context) =>
+                        AuthBloc(authRepository: context.read<AuthRepository>())
+                          ..add(AuthStarted()),
+                  ),
+                  BlocProvider(
+                    create: (context) => NotificationsCubit(
+                      notificationRepository: context
+                          .read<NotificationRepository>(),
+                    )..load(),
+                  ),
+                ],
                 child: Builder(
                   builder: (context) {
                     final router = createRouter(context.read<AuthBloc>());

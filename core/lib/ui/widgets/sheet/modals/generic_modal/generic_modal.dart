@@ -33,6 +33,7 @@ class _GenericModalState<T> extends State<GenericModal<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocProvider<GenericModalCubit<T>>(
       create: (_) {
         final cubit = GenericModalCubit<T>(
@@ -41,62 +42,56 @@ class _GenericModalState<T> extends State<GenericModal<T>> {
         Future.microtask(() => cubit.init(widget.items));
         return cubit;
       },
-      child: Builder(
-        builder: (context) {
-          return Column(
-            children: [
-              ModalHeaderComponent(title: widget.title),
-              Separator.divider(),
+      child: Column(
+        children: [
+          ModalHeaderComponent(title: widget.title),
+          Separator.divider(),
 
-              if (widget.canSearch)
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 10.h,
-                    horizontal: 15.w,
-                  ),
-                  child: TextFormFieldComponent(
-                    controller: _controller,
-                    prefixIcon: Icon(Icons.search, color: AppColor.muted),
-                    showClearButton: true,
-                    placeholder: widget.searchPlaceHolder,
-                    onChanged: (value) => _onSearch(value, context),
-                    onClear: () {
-                      _controller.clear();
-                      _onSearch('', context);
-                    },
-                  ),
-                ),
+          if (widget.canSearch)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 15.w),
+              child: TextFormFieldComponent(
+                controller: _controller,
+                prefixIcon: Icon(Icons.search, color: colors.onSurface),
+                showClearButton: true,
+                placeholder: widget.searchPlaceHolder,
+                onChanged: (value) => _onSearch(value, context),
+                onClear: () {
+                  _controller.clear();
+                  _onSearch('', context);
+                },
+              ),
+            ),
 
-              Expanded(
-                child: BlocBuilder<GenericModalCubit<T>, GenericModalState<T>>(
-                  builder: (context, state) {
-                    return ListView.builder(
-                      itemCount: state.filteredItems.length,
-                      itemBuilder: (context, index) {
-                        final item = state.filteredItems[index];
-                        final isLastItem =
-                            index == state.filteredItems.length - 1;
+          Expanded(
+            child: BlocBuilder<GenericModalCubit<T>, GenericModalState<T>>(
+              builder: (context, state) {
+                return ListView.builder(
+                  itemCount: state.filteredItems.length,
+                  itemBuilder: (context, index) {
+                    final item = state.filteredItems[index];
+                    final isLastItem = index == state.filteredItems.length - 1;
 
-                        return Column(
-                          children: [
-                            ListTile(
-                              title: Text(
-                                widget.itemLabelBuilder(item),
-                                style: AppTextStyles.normal14(),
-                              ),
-                              onTap: () => Navigator.pop(context, item),
+                    return Column(
+                      children: [
+                        ListTile(
+                          title: Text(
+                            widget.itemLabelBuilder(item),
+                            style: AppTextStyles.normal14(
+                              color: colors.onSurface,
                             ),
-                            if (!isLastItem) Separator.divider(),
-                          ],
-                        );
-                      },
+                          ),
+                          onTap: () => Navigator.pop(context, item),
+                        ),
+                        if (!isLastItem) Separator.divider(),
+                      ],
                     );
                   },
-                ),
-              ),
-            ],
-          );
-        },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

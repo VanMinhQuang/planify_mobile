@@ -13,6 +13,10 @@ extension DateFormatter on DateTime {
     return DateFormat('EEEE, dd MMMM yyyy', 'vi').format(this);
   }
 
+  String toMMdd() {
+    return DateFormat('MMMM dd').format(this);
+  }
+
   String toExactUtcIsoString() {
     return DateTime.utc(
       year,

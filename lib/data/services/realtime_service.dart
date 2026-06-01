@@ -40,7 +40,10 @@ class RealtimeService {
       'activity:created',
       'feed:plan_shared',
       'comment:created',
+      'comment:reply_created',
       'comment:deleted',
+      'comment:liked',
+      'comment:unliked',
       'friend:request_created',
       'friend:request_accepted',
     ]) {

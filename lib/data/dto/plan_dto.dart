@@ -64,13 +64,18 @@ class PlanDto {
   }
 
   static Map<String, dynamic> createBody(Plan plan) {
+    final startDate = plan.startDate;
+    final endDate = plan.endDate;
+    if (startDate == null || endDate == null) {
+      throw ArgumentError('Plan startDate and endDate are required');
+    }
     return {
       'title': plan.title,
       'description': plan.description,
       'category': plan.category.name.toUpperCase(),
       'coverImageUrl': plan.coverImageUrl,
-      'startDate': plan.startDate.toIso8601String(),
-      'endDate': plan.endDate.toIso8601String(),
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String(),
       'visibility': plan.visibility.name.toUpperCase(),
       'isSharedToFeed': plan.isSharedToFeed,
     };
@@ -92,6 +97,10 @@ class PlanDto {
       commentCount: commentCount,
       likeCount: likeCount,
       likedByMe: likedByMe,
+      memberUserIds: members
+          .map((member) => member.userId)
+          .whereType<String>()
+          .toList(),
     );
   }
 

@@ -22,19 +22,15 @@ class DefaultAppBar extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(16.w, 56.h, 12.w, 8.h),
-      decoration: BoxDecoration(gradient: AppColor.darkGradient),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        spacing: 15.w,
         children: [
           // ── Left: back button or spacer ──────────────
           if (canGoBack)
             InkWell(
               onTap: onBack ?? () => Navigator.of(context).pop(),
-              child: Icon(
-                Icons.arrow_back_rounded,
-                size: 18.sp,
-                color: AppColor.white,
-              ),
+              child: Icon(Icons.arrow_back_rounded, size: 18.sp),
             )
           else
             SizedBox.square(dimension: 18.h),
@@ -44,9 +40,9 @@ class DefaultAppBar extends StatelessWidget {
             child: Text(
               title,
               maxLines: 1,
-              style: AppTextStyles.semiBold16(color: AppColor.white),
+              style: context.bold16(),
               overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.left,
             ),
           ),
 

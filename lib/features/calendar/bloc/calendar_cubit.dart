@@ -35,8 +35,13 @@ class CalendarCubit extends Cubit<CalendarState> {
   List<Plan> plansForDay(DateTime day) {
     final date = _dateOnly(day);
     return state.plans.where((plan) {
-      final start = _dateOnly(plan.startDate);
-      final end = _dateOnly(plan.endDate);
+      final startDate = plan.startDate;
+      final endDate = plan.endDate;
+      if (startDate == null || endDate == null) {
+        return false;
+      }
+      final start = _dateOnly(startDate);
+      final end = _dateOnly(endDate);
       return !date.isBefore(start) && !date.isAfter(end);
     }).toList();
   }

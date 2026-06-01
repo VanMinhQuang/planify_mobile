@@ -73,6 +73,7 @@ class TextFormFieldComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -100,7 +101,7 @@ class TextFormFieldComponent extends StatelessWidget {
             autovalidateMode: isAutoValidate
                 ? AutovalidateMode.onUserInteraction
                 : null,
-            style: AppTextStyles.normal14(),
+            style: context.normal14(color: colors.onSurface),
             onTap: isReadOnly
                 ? null
                 : (isDropDown || isDateBox)
@@ -124,9 +125,7 @@ class TextFormFieldComponent extends StatelessWidget {
             decoration: InputDecoration(
               filled: true,
               counterText: '',
-              fillColor: isReadOnly
-                  ? AppColor.hint.withAlpha(60)
-                  : boxColor ?? AppColor.white,
+              fillColor: isReadOnly ? AppColor.hint.withAlpha(60) : boxColor,
               hintText: placeholder,
               hintStyle: AppTextStyles.normal14(color: AppColor.hint),
               prefixIcon: prefixIcon == null

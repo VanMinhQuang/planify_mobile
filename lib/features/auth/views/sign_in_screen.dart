@@ -50,7 +50,12 @@ class SignInScreen extends StatelessWidget {
                   ),
                 ),
                 Separator.spacer(60.h),
-                Center(child: Assets.logo.logoNoBackground.image(width: 200.w)),
+                Center(
+                  child: Hero(
+                    tag: AppLogo.planifyLogoHeroTag,
+                    child: Assets.logo.logoNoBackground.image(width: 200.w),
+                  ),
+                ),
                 Separator.spacer(20.h),
                 Text('Planify', style: context.bold24()),
                 const SizedBox(height: 8),

@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class LocaleKeys {
+abstract class  LocaleKeys {
   static const app_name = 'app_name';
   static const app_title = 'app_title';
   static const login_system = 'login_system';
@@ -249,35 +249,26 @@ abstract class LocaleKeys {
   static const select_status = 'select_status';
   static const address_placeholder = 'address_placeholder';
   static const legal_representative = 'legal_representative';
-  static const legal_representative_placeholder =
-      'legal_representative_placeholder';
+  static const legal_representative_placeholder = 'legal_representative_placeholder';
   static const legal_representative_required = 'legal_representative_required';
   static const facility_phone = 'facility_phone';
   static const phone_placeholder = 'phone_placeholder';
   static const monks_nuns_followers_count = 'monks_nuns_followers_count';
-  static const monks_nuns_followers_placeholder =
-      'monks_nuns_followers_placeholder';
+  static const monks_nuns_followers_placeholder = 'monks_nuns_followers_placeholder';
   static const documents_and_decisions = 'documents_and_decisions';
-  static const establishment_decision_internal =
-      'establishment_decision_internal';
-  static const establishment_decision_internal_placeholder =
-      'establishment_decision_internal_placeholder';
-  static const establishment_decision_priority_display =
-      'establishment_decision_priority_display';
-  static const establishment_decision_priority_placeholder =
-      'establishment_decision_priority_placeholder';
+  static const establishment_decision_internal = 'establishment_decision_internal';
+  static const establishment_decision_internal_placeholder = 'establishment_decision_internal_placeholder';
+  static const establishment_decision_priority_display = 'establishment_decision_priority_display';
+  static const establishment_decision_priority_placeholder = 'establishment_decision_priority_placeholder';
   static const abbot_appointment_decision = 'abbot_appointment_decision';
-  static const abbot_appointment_decision_placeholder =
-      'abbot_appointment_decision_placeholder';
+  static const abbot_appointment_decision_placeholder = 'abbot_appointment_decision_placeholder';
   static const operation_license = 'operation_license';
   static const operation_license_placeholder = 'operation_license_placeholder';
   static const activities_and_violations = 'activities_and_violations';
   static const regular_activities = 'regular_activities';
-  static const regular_activities_placeholder =
-      'regular_activities_placeholder';
+  static const regular_activities_placeholder = 'regular_activities_placeholder';
   static const violations_recorded = 'violations_recorded';
-  static const violations_recorded_placeholder =
-      'violations_recorded_placeholder';
+  static const violations_recorded_placeholder = 'violations_recorded_placeholder';
   static const remedial_measures = 'remedial_measures';
   static const remedial_measures_placeholder = 'remedial_measures_placeholder';
   static const leadership = 'leadership';
@@ -299,17 +290,13 @@ abstract class LocaleKeys {
   static const reports_and_statistics = 'reports_and_statistics';
   static const gis_map = 'gis_map';
   static const report_by_category = 'report_by_category';
-  static const assets_needing_inspection_report =
-      'assets_needing_inspection_report';
-  static const scheduled_inspection_assets_report =
-      'scheduled_inspection_assets_report';
-  static const operational_data_summary_by_time =
-      'operational_data_summary_by_time';
+  static const assets_needing_inspection_report = 'assets_needing_inspection_report';
+  static const scheduled_inspection_assets_report = 'scheduled_inspection_assets_report';
+  static const operational_data_summary_by_time = 'operational_data_summary_by_time';
   static const monthly_case_reports = 'monthly_case_reports';
   static const cases_by_classification = 'cases_by_classification';
   static const reports_by_status = 'reports_by_status';
-  static const operational_efficiency_comparison =
-      'operational_efficiency_comparison';
+  static const operational_efficiency_comparison = 'operational_efficiency_comparison';
   static const asset_summary_by_category = 'asset_summary_by_category';
   static const search = 'search';
   static const searching = 'searching';
@@ -358,8 +345,7 @@ abstract class LocaleKeys {
   static const crime_report_management = 'crime_report_management';
   static const case_file_tracking = 'case_file_tracking';
   static const compliance_monitoring = 'compliance_monitoring';
-  static const cases_with_investigation_deadline_next_15_days =
-      'cases_with_investigation_deadline_next_15_days';
+  static const cases_with_investigation_deadline_next_15_days = 'cases_with_investigation_deadline_next_15_days';
   static const search_case_placeholder = 'search_case_placeholder';
   static const no_data = 'no_data';
   static const nearly_expired = 'nearly_expired';
@@ -380,18 +366,15 @@ abstract class LocaleKeys {
   static const case_category_economic = 'case_category_economic';
   static const case_category_other = 'case_category_other';
   static const case_status_new = 'case_status_new';
-  static const case_status_under_investigation =
-      'case_status_under_investigation';
+  static const case_status_under_investigation = 'case_status_under_investigation';
   static const case_status_prosecuted = 'case_status_prosecuted';
   static const case_status_suspended = 'case_status_suspended';
   static const case_status_closed = 'case_status_closed';
   static const case_timeline_extension = 'case_timeline_extension';
-  static const case_timeline_prosecute_suspect =
-      'case_timeline_prosecute_suspect';
+  static const case_timeline_prosecute_suspect = 'case_timeline_prosecute_suspect';
   static const case_timeline_supplement = 'case_timeline_supplement';
   static const case_timeline_assignment = 'case_timeline_assignment';
-  static const case_timeline_investigation_step =
-      'case_timeline_investigation_step';
+  static const case_timeline_investigation_step = 'case_timeline_investigation_step';
   static const case_timeline_warning = 'case_timeline_warning';
   static const case_timeline_case_created = 'case_timeline_case_created';
   static const case_timeline_other = 'case_timeline_other';
@@ -409,54 +392,34 @@ abstract class LocaleKeys {
   static const signed = 'signed';
   static const processing = 'processing';
   static const completed = 'completed';
-  static const administrative_action_submitted =
-      'administrative_action_submitted';
-  static const administrative_action_not_submitted =
-      'administrative_action_not_submitted';
-  static const administrative_action_not_approved =
-      'administrative_action_not_approved';
-  static const administrative_action_not_signed =
-      'administrative_action_not_signed';
-  static const administrative_action_not_issued =
-      'administrative_action_not_issued';
-  static const administrative_action_has_rejected =
-      'administrative_action_has_rejected';
+  static const administrative_action_submitted = 'administrative_action_submitted';
+  static const administrative_action_not_submitted = 'administrative_action_not_submitted';
+  static const administrative_action_not_approved = 'administrative_action_not_approved';
+  static const administrative_action_not_signed = 'administrative_action_not_signed';
+  static const administrative_action_not_issued = 'administrative_action_not_issued';
+  static const administrative_action_has_rejected = 'administrative_action_has_rejected';
   static const administrative_workflow_draft = 'administrative_workflow_draft';
-  static const administrative_workflow_pending_approval =
-      'administrative_workflow_pending_approval';
-  static const administrative_workflow_digital_sign =
-      'administrative_workflow_digital_sign';
-  static const administrative_kind_incoming_dispatch =
-      'administrative_kind_incoming_dispatch';
-  static const administrative_kind_outgoing_dispatch =
-      'administrative_kind_outgoing_dispatch';
-  static const administrative_kind_citizen_reception =
-      'administrative_kind_citizen_reception';
-  static const administrative_status_not_processed =
-      'administrative_status_not_processed';
-  static const administrative_doc_type_dispatch =
-      'administrative_doc_type_dispatch';
-  static const administrative_doc_type_decision =
-      'administrative_doc_type_decision';
-  static const administrative_doc_type_notification =
-      'administrative_doc_type_notification';
-  static const probation_type_suspended_sentence =
-      'probation_type_suspended_sentence';
-  static const probation_type_non_custodial_reform =
-      'probation_type_non_custodial_reform';
+  static const administrative_workflow_pending_approval = 'administrative_workflow_pending_approval';
+  static const administrative_workflow_digital_sign = 'administrative_workflow_digital_sign';
+  static const administrative_kind_incoming_dispatch = 'administrative_kind_incoming_dispatch';
+  static const administrative_kind_outgoing_dispatch = 'administrative_kind_outgoing_dispatch';
+  static const administrative_kind_citizen_reception = 'administrative_kind_citizen_reception';
+  static const administrative_status_not_processed = 'administrative_status_not_processed';
+  static const administrative_doc_type_dispatch = 'administrative_doc_type_dispatch';
+  static const administrative_doc_type_decision = 'administrative_doc_type_decision';
+  static const administrative_doc_type_notification = 'administrative_doc_type_notification';
+  static const probation_type_suspended_sentence = 'probation_type_suspended_sentence';
+  static const probation_type_non_custodial_reform = 'probation_type_non_custodial_reform';
   static const probation_type_residence_ban = 'probation_type_residence_ban';
   static const probation_type_probation = 'probation_type_probation';
-  static const probation_type_citizenship_deprivation =
-      'probation_type_citizenship_deprivation';
+  static const probation_type_citizenship_deprivation = 'probation_type_citizenship_deprivation';
   static const probation_type_position_ban = 'probation_type_position_ban';
-  static const probation_type_community_probation_old =
-      'probation_type_community_probation_old';
+  static const probation_type_community_probation_old = 'probation_type_community_probation_old';
   static const probation_type_trial_old = 'probation_type_trial_old';
   static const probation_type_other = 'probation_type_other';
   static const probation_status_serving = 'probation_status_serving';
   static const probation_status_completed = 'probation_status_completed';
-  static const probation_status_fully_completed =
-      'probation_status_fully_completed';
+  static const probation_status_fully_completed = 'probation_status_fully_completed';
   static const probation_status_suspended = 'probation_status_suspended';
   static const probation_status_absconded = 'probation_status_absconded';
   static const delete_case_success = 'delete_case_success';
@@ -530,8 +493,7 @@ abstract class LocaleKeys {
   static const criminal_record = 'criminal_record';
   static const criminal_record_note = 'criminal_record_note';
   static const preventive_measure = 'preventive_measure';
-  static const preventive_measure_placeholder =
-      'preventive_measure_placeholder';
+  static const preventive_measure_placeholder = 'preventive_measure_placeholder';
   static const prosecution_decision_number = 'prosecution_decision_number';
   static const lawyer = 'lawyer';
   static const lawyer_name = 'lawyer_name';
@@ -601,18 +563,15 @@ abstract class LocaleKeys {
   static const case_summary_report = 'case_summary_report';
   static const short_description = 'short_description';
   static const assignment_and_deadline = 'assignment_and_deadline';
-  static const enter_assignment_decision_number =
-      'enter_assignment_decision_number';
+  static const enter_assignment_decision_number = 'enter_assignment_decision_number';
   static const select_deadline_date = 'select_deadline_date';
   static const deadline_date = 'deadline_date';
   static const not_assigned = 'not_assigned';
-  static const select_assigned_officer_required =
-      'select_assigned_officer_required';
+  static const select_assigned_officer_required = 'select_assigned_officer_required';
   static const reporter_information = 'reporter_information';
   static const enter_reporter_name = 'enter_reporter_name';
   static const reporter_name = 'reporter_name';
-  static const search_by_fullname_cccd_crime_case =
-      'search_by_fullname_cccd_crime_case';
+  static const search_by_fullname_cccd_crime_case = 'search_by_fullname_cccd_crime_case';
   static const sentence_type = 'sentence_type';
   static const estimated_completion = 'estimated_completion';
   static const case_manager = 'case_manager';
@@ -655,30 +614,21 @@ abstract class LocaleKeys {
   static const gender_required = 'gender_required';
   static const education_level_placeholder = 'education_level_placeholder';
   static const education_level_required = 'education_level_required';
-  static const permanent_residence_registration =
-      'permanent_residence_registration';
-  static const enter_permanent_residence_registration =
-      'enter_permanent_residence_registration';
-  static const permanent_residence_registration_required =
-      'permanent_residence_registration_required';
-  static const temporary_residence_registration =
-      'temporary_residence_registration';
-  static const enter_temporary_residence_registration =
-      'enter_temporary_residence_registration';
-  static const temporary_residence_registration_required =
-      'temporary_residence_registration_required';
-  static const sentence_punishment_information =
-      'sentence_punishment_information';
+  static const permanent_residence_registration = 'permanent_residence_registration';
+  static const enter_permanent_residence_registration = 'enter_permanent_residence_registration';
+  static const permanent_residence_registration_required = 'permanent_residence_registration_required';
+  static const temporary_residence_registration = 'temporary_residence_registration';
+  static const enter_temporary_residence_registration = 'enter_temporary_residence_registration';
+  static const temporary_residence_registration_required = 'temporary_residence_registration_required';
+  static const sentence_punishment_information = 'sentence_punishment_information';
   static const enter_crime_offense = 'enter_crime_offense';
   static const crime_offense_required = 'crime_offense_required';
   static const sentence_penalty = 'sentence_penalty';
   static const enter_sentence_penalty = 'enter_sentence_penalty';
   static const sentence_penalty_required = 'sentence_penalty_required';
-  static const suspended_sentence_subject_type =
-      'suspended_sentence_subject_type';
+  static const suspended_sentence_subject_type = 'suspended_sentence_subject_type';
   static const select_probation_subject_type = 'select_probation_subject_type';
-  static const probation_subject_type_required =
-      'probation_subject_type_required';
+  static const probation_subject_type_required = 'probation_subject_type_required';
   static const select_execution_status = 'select_execution_status';
   static const execution_status_required = 'execution_status_required';
   static const probation_duration_months = 'probation_duration_months';
@@ -709,8 +659,7 @@ abstract class LocaleKeys {
   static const enter_violation = 'enter_violation';
   static const violation_required = 'violation_required';
   static const note_required = 'note_required';
-  static const court_sentence_number_required =
-      'court_sentence_number_required';
+  static const court_sentence_number_required = 'court_sentence_number_required';
   static const sentence_kind_description = 'sentence_kind_description';
   static const enter_sentence_kind = 'enter_sentence_kind';
   static const sentence_kind_required = 'sentence_kind_required';
@@ -719,46 +668,27 @@ abstract class LocaleKeys {
   static const sentence_status = 'sentence_status';
   static const sentence_type_filter = 'sentence_type_filter';
   static const total_documents = 'total_documents';
-  static const administrative_detail_leader_directive =
-      'administrative_detail_leader_directive';
-  static const administrative_detail_reject_reason =
-      'administrative_detail_reject_reason';
-  static const administrative_detail_attachments =
-      'administrative_detail_attachments';
+  static const administrative_detail_leader_directive = 'administrative_detail_leader_directive';
+  static const administrative_detail_reject_reason = 'administrative_detail_reject_reason';
+  static const administrative_detail_attachments = 'administrative_detail_attachments';
   static const administrative_detail_locked = 'administrative_detail_locked';
-  static const administrative_detail_received_date =
-      'administrative_detail_received_date';
-  static const administrative_detail_document_number =
-      'administrative_detail_document_number';
-  static const administrative_detail_document_date =
-      'administrative_detail_document_date';
-  static const administrative_detail_issuing_agency =
-      'administrative_detail_issuing_agency';
-  static const administrative_detail_document_type =
-      'administrative_detail_document_type';
-  static const administrative_detail_outbound_send_date =
-      'administrative_detail_outbound_send_date';
-  static const administrative_detail_issued_date =
-      'administrative_detail_issued_date';
-  static const administrative_detail_document_info =
-      'administrative_detail_document_info';
-  static const administrative_detail_not_performed =
-      'administrative_detail_not_performed';
-  static const administrative_detail_rejected =
-      'administrative_detail_rejected';
-  static const administrative_detail_processor =
-      'administrative_detail_processor';
+  static const administrative_detail_received_date = 'administrative_detail_received_date';
+  static const administrative_detail_document_number = 'administrative_detail_document_number';
+  static const administrative_detail_document_date = 'administrative_detail_document_date';
+  static const administrative_detail_issuing_agency = 'administrative_detail_issuing_agency';
+  static const administrative_detail_document_type = 'administrative_detail_document_type';
+  static const administrative_detail_outbound_send_date = 'administrative_detail_outbound_send_date';
+  static const administrative_detail_issued_date = 'administrative_detail_issued_date';
+  static const administrative_detail_document_info = 'administrative_detail_document_info';
+  static const administrative_detail_not_performed = 'administrative_detail_not_performed';
+  static const administrative_detail_rejected = 'administrative_detail_rejected';
+  static const administrative_detail_processor = 'administrative_detail_processor';
   static const administrative_detail_signer = 'administrative_detail_signer';
-  static const administrative_detail_approved_date =
-      'administrative_detail_approved_date';
-  static const administrative_detail_signed_date =
-      'administrative_detail_signed_date';
-  static const administrative_detail_category =
-      'administrative_detail_category';
-  static const administrative_detail_reception_officer =
-      'administrative_detail_reception_officer';
-  static const administrative_detail_citizen_reception_info =
-      'administrative_detail_citizen_reception_info';
+  static const administrative_detail_approved_date = 'administrative_detail_approved_date';
+  static const administrative_detail_signed_date = 'administrative_detail_signed_date';
+  static const administrative_detail_category = 'administrative_detail_category';
+  static const administrative_detail_reception_officer = 'administrative_detail_reception_officer';
+  static const administrative_detail_citizen_reception_info = 'administrative_detail_citizen_reception_info';
   static const forwardToLeader = 'forwardToLeader';
   static const approve = 'approve';
   static const sign = 'sign';
@@ -774,12 +704,9 @@ abstract class LocaleKeys {
   static const document = 'document';
   static const document_search_placeholder = 'document_search_placeholder';
   static const forward_for_processing = 'forward_for_processing';
-  static const document_will_be_pending_approval =
-      'document_will_be_pending_approval';
-  static const authorized_leader_will_be_notified =
-      'authorized_leader_will_be_notified';
-  static const track_progress_in_processing_section =
-      'track_progress_in_processing_section';
+  static const document_will_be_pending_approval = 'document_will_be_pending_approval';
+  static const authorized_leader_will_be_notified = 'authorized_leader_will_be_notified';
+  static const track_progress_in_processing_section = 'track_progress_in_processing_section';
   static const action_to_be_performed = 'action_to_be_performed';
   static const receiving_agency = 'receiving_agency';
   static const approval_note_optional = 'approval_note_optional';
@@ -789,4 +716,5 @@ abstract class LocaleKeys {
   static const document_summary = 'document_summary';
   static const attachments = 'attachments';
   static const process_step = 'process_step';
+
 }

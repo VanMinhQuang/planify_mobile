@@ -17,6 +17,7 @@ class ImageActionModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocListener<ImageActionCubit, ImageActionState>(
       listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
@@ -52,7 +53,10 @@ class ImageActionModal extends StatelessWidget {
                   }
                   Navigator.pop(context, 'camera');
                 },
-                title: Text('Chụp hình', style: AppTextStyles.normal14()),
+                title: Text(
+                  'Chụp hình',
+                  style: AppTextStyles.normal14(color: colors.onSurface),
+                ),
                 leading: Icon(LucideIcons.camera),
               ),
               Separator.divider(),
@@ -62,7 +66,7 @@ class ImageActionModal extends StatelessWidget {
                 },
                 title: Text(
                   'Chọn từ thư viện',
-                  style: AppTextStyles.normal14(),
+                  style: AppTextStyles.normal14(color: colors.onSurface),
                 ),
                 leading: Icon(LucideIcons.imagePlus),
               ),
@@ -73,7 +77,10 @@ class ImageActionModal extends StatelessWidget {
                   onTap: () async {
                     Navigator.pop(context, 'file');
                   },
-                  title: Text('Chọn từ file', style: AppTextStyles.normal14()),
+                  title: Text(
+                    'Chọn từ file',
+                    style: AppTextStyles.normal14(color: colors.onSurface),
+                  ),
                   leading: Icon(LucideIcons.filePlus),
                 ),
               ],

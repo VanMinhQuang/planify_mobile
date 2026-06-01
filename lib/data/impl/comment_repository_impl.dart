@@ -23,10 +23,18 @@ class CommentRepositoryImpl implements CommentRepository {
   }
 
   @override
-  Future<PlanComment> createComment(String planId, String content) async {
+  Future<PlanComment> createComment(
+    String planId,
+    String content, {
+    String? parentCommentId,
+  }) async {
+    final body = <String, dynamic>{'content': content};
+    if (parentCommentId != null) {
+      body['parentCommentId'] = parentCommentId;
+    }
     final result = await _apiClient.post(
       path: ApiUrl.planComments(planId),
-      body: {'content': content},
+      body: body,
       parser: (json) =>
           PlanCommentDto.fromJson(json as Map<String, dynamic>).toDomain(),
     );
@@ -39,5 +47,30 @@ class CommentRepositoryImpl implements CommentRepository {
   @override
   Future<void> deleteComment(String planId, String commentId) async {
     await _apiClient.delete(path: ApiUrl.planComment(planId, commentId));
+  }
+
+  @override
+  Future<Map<String, dynamic>> likeComment(
+    String planId,
+    String commentId,
+  ) async {
+    final result = await _apiClient.post(
+      path: ApiUrl.planCommentLikes(planId, commentId),
+      body: {},
+      parser: (json) => json as Map<String, dynamic>,
+    );
+    return result ?? {};
+  }
+
+  @override
+  Future<Map<String, dynamic>> unlikeComment(
+    String planId,
+    String commentId,
+  ) async {
+    final result = await _apiClient.delete(
+      path: ApiUrl.planCommentLikes(planId, commentId),
+      parser: (json) => json as Map<String, dynamic>,
+    );
+    return result ?? {};
   }
 }

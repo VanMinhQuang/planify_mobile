@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app_core/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -129,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: ListTile(
                         title: Text(plan.title),
                         subtitle: Text(
-                          '${DateFormat.MMMd().format(plan.startDate)} - ${DateFormat.MMMd().format(plan.endDate)}',
+                          '${plan.startDate?.toDDMMYYYY()} - ${plan.endDate?.toDDMMYYYY()}',
                         ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () =>

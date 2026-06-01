@@ -1,5 +1,6 @@
 library;
 
+export 'package:syncfusion_flutter_core/core.dart';
 export 'package:firebase_auth/firebase_auth.dart';
 export 'package:google_sign_in/google_sign_in.dart';
 export 'package:animated_text_kit/animated_text_kit.dart';

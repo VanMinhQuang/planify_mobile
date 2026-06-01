@@ -10,11 +10,9 @@ class AppImage extends StatelessWidget {
   final BorderRadius? borderRadius;
   final bool isApiImage;
   final IconData? errorIcon;
-  final String baseUrl;
 
   const AppImage({
     super.key,
-    required this.baseUrl,
     required this.url,
     this.width,
     this.height,
@@ -27,7 +25,7 @@ class AppImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget image = CachedNetworkImage(
-      imageUrl: '$baseUrl$url',
+      imageUrl: '$url',
       width: width,
       height: height,
       fit: fit,

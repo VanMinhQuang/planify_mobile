@@ -1,8 +1,5 @@
-import 'package:app_core/ui/constants/app_color.dart';
-import 'package:app_core/ui/constants/app_text_styles.dart';
+import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
-
-import '../../../constants/app_size.dart';
 
 class ModalHeaderComponent extends StatelessWidget {
   final String title;
@@ -11,17 +8,17 @@ class ModalHeaderComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       children: [
-        Container(
-          color: AppColor.white,
+        Padding(
           padding: EdgeInsets.only(top: 12.h, bottom: 4.h),
           child: Center(
             child: Container(
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: AppColor.gray500,
+                color: Colors.grey,
                 borderRadius: BorderRadius.circular(100),
               ),
             ),
@@ -30,7 +27,6 @@ class ModalHeaderComponent extends StatelessWidget {
 
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
-          decoration: BoxDecoration(color: AppColor.white),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -40,7 +36,9 @@ class ModalHeaderComponent extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: AppTextStyles.semiBold16().copyWith(fontSize: 15.sp),
+                  style: AppTextStyles.semiBold16(
+                    color: colors.onSurface,
+                  ).copyWith(fontSize: 15.sp),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -48,7 +46,7 @@ class ModalHeaderComponent extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).pop();
                 },
-                child: Icon(Icons.close, color: AppColor.textDark, size: 24.h),
+                child: Icon(Icons.close, color: colors.onSurface, size: 24.h),
               ),
             ],
           ),

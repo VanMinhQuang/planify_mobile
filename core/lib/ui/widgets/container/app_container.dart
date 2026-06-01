@@ -23,7 +23,6 @@ class AppContainer extends StatelessWidget {
     this.bottomNav,
     this.gradient,
     this.onRefresh,
-    this.hasSpaceForAppBar = true,
     this.fab,
     this.fabLocation,
   });
@@ -43,7 +42,6 @@ class AppContainer extends StatelessWidget {
   final bool isFullScreen;
   final Widget? bottomNav;
   final RefreshCallback? onRefresh;
-  final bool hasSpaceForAppBar;
   final Widget? fab;
   final FloatingActionButtonLocation? fabLocation;
 
@@ -69,9 +67,11 @@ class AppContainer extends StatelessWidget {
                 )
         else if (!isFullScreen)
           const SizedBox(height: 52),
-        if (hasSpaceForAppBar) const SizedBox(height: 10),
         Expanded(
-          child: Padding(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: context.planifyGradients.background,
+            ),
             padding: isFullScreen
                 ? EdgeInsets.zero
                 : padding ?? const EdgeInsets.symmetric(horizontal: 16),
@@ -97,13 +97,11 @@ class AppContainer extends StatelessWidget {
           extendBodyBehindAppBar: isFullScreen,
           backgroundColor: gradient != null
               ? Colors.transparent
-              : backgroundColor ?? Colors.white,
+              : backgroundColor,
           bottomNavigationBar: bottomNav,
           body: Container(
             decoration: BoxDecoration(
-              color: gradient == null
-                  ? (backgroundColor ?? Colors.white)
-                  : null,
+              color: backgroundColor,
               gradient: gradient,
             ),
             child: GestureDetector(

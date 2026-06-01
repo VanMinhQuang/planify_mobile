@@ -46,12 +46,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const NavigationDestination(
                 icon: Icon(Icons.dynamic_feed_outlined),
                 selectedIcon: Icon(Icons.dynamic_feed),
-                label: 'Feed',
+                label: '',
               ),
               const NavigationDestination(
                 icon: Icon(Icons.calendar_month_outlined),
                 selectedIcon: Icon(Icons.calendar_month),
-                label: 'Calendar',
+                label: '',
               ),
               NavigationDestination(
                 icon: _AvatarNavIcon(avatarUrl: avatarUrl),
@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   avatarUrl: avatarUrl,
                   isSelected: true,
                 ),
-                label: 'User',
+                label: '',
               ),
             ],
           );

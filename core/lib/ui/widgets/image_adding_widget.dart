@@ -27,13 +27,13 @@ class ImageAddingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       margin: EdgeInsets.symmetric(vertical: 4.h),
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColor.hint.withOpacity(0.2)),
-        color: AppColor.white,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,11 +48,11 @@ class ImageAddingWidget extends StatelessWidget {
                 Icon(
                   iconData ?? LucideIcons.imagePlus,
                   size: 18.sp,
-                  color: AppColor.hint,
+                  color: colors.primary,
                 ),
                 Text(
                   title,
-                  style: AppTextStyles.semiBold14(color: AppColor.hint),
+                  style: AppTextStyles.semiBold14(color: colors.onSurface),
                 ),
               ],
             ),
@@ -80,32 +80,49 @@ class ImageAddingWidget extends StatelessWidget {
             ),
 
           /// LIST
-          ListView.separated(
+          /// GRID
+          GridView.builder(
             shrinkWrap: true,
-            padding: EdgeInsetsGeometry.symmetric(
-              horizontal: 8.w,
-              vertical: 8.h,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
             physics: const NeverScrollableScrollPhysics(),
             itemCount: items.length + 1,
-            separatorBuilder: (_, __) => const SizedBox(height: 6),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8.w,
+              mainAxisSpacing: 8.h,
+              childAspectRatio: 1,
+            ),
             itemBuilder: (context, index) {
               if (index == items.length) {
-                return AppButton(
+                return InkWell(
                   onTap: onAddImage,
-                  child: Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 4.w,
-                    children: [
-                      Icon(LucideIcons.imagePlus, color: AppColor.white),
-                      Text(
-                        LocaleKeys.add_data.tr(),
-                        style: AppTextStyles.bold14(color: AppColor.white),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: colors.primary.withOpacity(0.4),
                       ),
-                    ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          LucideIcons.imagePlus,
+                          color: colors.primary,
+                          size: 24.sp,
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          LocaleKeys.add_data.tr(),
+                          style: AppTextStyles.normal12(color: colors.primary),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }
+
               final item = items[index];
 
               return InkWell(
@@ -116,59 +133,77 @@ class ImageAddingWidget extends StatelessWidget {
                     CommonUtils.launchUrl(url: "$baseUrl/${item.path}");
                   }
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey.withOpacity(0.08),
-                    border: Border.all(color: AppColor.hint.withOpacity(0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      /// PREVIEW
-                      item.isImage
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: item.isLocal
-                                  ? Image.file(
-                                      File(item.path),
-                                      width: 44,
-                                      height: 44,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.network(
-                                      baseUrl + item.path,
-                                      width: 44,
-                                      height: 44,
-                                      fit: BoxFit.cover,
+                borderRadius: BorderRadius.circular(10),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey.withOpacity(0.08),
+                          border: Border.all(
+                            color: AppColor.hint.withOpacity(0.2),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: item.isImage
+                              ? item.isLocal
+                                    ? Image.file(
+                                        File(item.path),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.network(
+                                        "$baseUrl/${item.path}",
+                                        fit: BoxFit.cover,
+                                      )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.insert_drive_file,
+                                      size: 32,
                                     ),
-                            )
-                          : const Icon(Icons.insert_drive_file, size: 36),
-
-                      const SizedBox(width: 10),
-
-                      /// FILE NAME
-                      Expanded(
-                        child: Text(
-                          item.path.split('/').last,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-
-                          style: AppTextStyles.normal12(),
+                                    SizedBox(height: 4.h),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 4.w,
+                                      ),
+                                      child: Text(
+                                        item.path.split('/').last,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        style: AppTextStyles.normal10(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
+                    ),
 
-                      /// REMOVE
-                      if (onRemove != null)
-                        GestureDetector(
+                    if (onRemove != null)
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: GestureDetector(
                           onTap: () => onRemove!(item),
-                          child: const Icon(Icons.close, size: 18),
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               );
             },

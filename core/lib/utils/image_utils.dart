@@ -278,7 +278,6 @@ class ImagePickerUtil {
     // Bước 1: Chỉ show bottom sheet để chọn hành động
     final action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: AppColor.white,
       clipBehavior: Clip.hardEdge,
       isScrollControlled: true,
       useSafeArea: true,

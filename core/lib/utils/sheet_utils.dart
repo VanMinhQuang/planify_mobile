@@ -19,7 +19,6 @@ class SheetUtils {
     if (isAndroid) {
       return await showModalBottomSheet<T>(
         context: context,
-        backgroundColor: AppColor.white,
         clipBehavior: Clip.hardEdge,
         isScrollControlled: true,
         useSafeArea: true,

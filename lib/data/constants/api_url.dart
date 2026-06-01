@@ -22,6 +22,8 @@ class ApiUrl {
   static String planComments(String planId) => '/plans/$planId/comments';
   static String planComment(String planId, String commentId) =>
       '/plans/$planId/comments/$commentId';
+  static String planCommentLikes(String planId, String commentId) =>
+      '/plans/$planId/comments/$commentId/likes';
   static String planLikes(String planId) => '/plans/$planId/likes';
   static String planActivity(String planId) => '/plans/$planId/activity';
   static String userProfile(String userId) => '/users/$userId/profile';

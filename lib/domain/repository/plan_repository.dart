@@ -22,5 +22,5 @@ abstract interface class PlanRepository {
 
   Future<List<ActivityEntry>> listActivity(String planId);
 
-  Future<Map<String, dynamic>> createInvite(String planId);
+  Future<Map<String, dynamic>> createInvite(String planId, {String? inviteeId});
 }

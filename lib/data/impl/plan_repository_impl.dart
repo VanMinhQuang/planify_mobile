@@ -180,11 +180,14 @@ class PlanRepositoryImpl implements PlanRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> createInvite(String planId) async {
+  Future<Map<String, dynamic>> createInvite(
+    String planId, {
+    String? inviteeId,
+  }) async {
     try {
       final result = await _apiClient.post(
         path: ApiUrl.planInvites(planId),
-        body: {}, // empty body
+        body: inviteeId == null ? {} : {'inviteeId': inviteeId},
         parser: (json) => json as Map<String, dynamic>,
       );
       return result ?? {};

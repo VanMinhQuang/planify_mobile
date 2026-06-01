@@ -4,15 +4,19 @@ import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:planify_mobile/domain/repository/auth_repository.dart';
+import 'package:planify_mobile/domain/repository/comment_repository.dart';
 import 'package:planify_mobile/domain/repository/feed_repository.dart';
+import 'package:planify_mobile/domain/repository/friend_repository.dart';
 import 'package:planify_mobile/domain/repository/like_repository.dart';
 import 'package:planify_mobile/domain/repository/notification_repository.dart';
 import 'package:planify_mobile/domain/repository/plan_repository.dart';
 import 'package:planify_mobile/domain/repository/profile_repository.dart';
 import 'package:planify_mobile/domain/repository/upload_repository.dart';
 import 'package:planify_mobile/features/features.dart';
+import 'package:planify_mobile/features/plan/create/cubit/create_plan_cubit.dart';
 
 class Routes {
+  static const splash = "/splash";
   static const home = "/";
   static const signIn = "/sign-in";
   static const signUp = "/sign-up";
@@ -33,7 +37,7 @@ GoRouter? _routerInstance;
 GoRouter createRouter(AuthBloc authBloc) {
   if (_routerInstance != null) return _routerInstance!;
   _routerInstance = GoRouter(
-    initialLocation: Routes.signIn,
+    initialLocation: Routes.splash,
     navigatorKey: rootNavigatorKey,
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {
@@ -41,8 +45,15 @@ GoRouter createRouter(AuthBloc authBloc) {
       final isAuthRoute =
           state.matchedLocation == Routes.signIn ||
           state.matchedLocation == Routes.signUp;
+      final isSplashRoute = state.matchedLocation == Routes.splash;
 
-      if (status == AuthStatus.loading || status == AuthStatus.unknown) {
+      if (status == AuthStatus.unknown) {
+        return isSplashRoute ? null : Routes.splash;
+      }
+      if (status == AuthStatus.loading) {
+        return null;
+      }
+      if (isSplashRoute) {
         return null;
       }
       if (status == AuthStatus.unauthenticated || status == AuthStatus.error) {
@@ -54,6 +65,10 @@ GoRouter createRouter(AuthBloc authBloc) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: Routes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: Routes.signIn,
         builder: (context, state) => const SignInScreen(),
@@ -93,14 +108,22 @@ GoRouter createRouter(AuthBloc authBloc) {
       ),
       GoRoute(
         path: Routes.plansNew,
-        builder: (context, state) => const CreatePlanScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) =>
+              CreatePlanCubit(planRepository: context.read<PlanRepository>()),
+          child: const CreatePlanScreen(),
+        ),
       ),
       GoRoute(
         path: Routes.plansDetail,
         builder: (context, state) => BlocProvider(
-          create: (context) =>
-              PlanDetailCubit(planRepository: context.read<PlanRepository>())
-                ..load(state.pathParameters['planId']!),
+          create: (context) => PlanDetailCubit(
+            planRepository: context.read<PlanRepository>(),
+            commentRepository: context.read<CommentRepository>(),
+            likeRepository: context.read<LikeRepository>(),
+            friendRepository: context.read<FriendRepository>(),
+            currentUserId: context.read<AuthBloc>().state.user?.id,
+          )..load(state.pathParameters['planId']!),
           child: const PlanDetailScreen(),
         ),
       ),
@@ -114,12 +137,7 @@ GoRouter createRouter(AuthBloc authBloc) {
       ),
       GoRoute(
         path: Routes.notifications,
-        builder: (context, state) => BlocProvider(
-          create: (context) => NotificationsCubit(
-            notificationRepository: context.read<NotificationRepository>(),
-          )..load(),
-          child: const NotificationsScreen(),
-        ),
+        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         path: Routes.profile,

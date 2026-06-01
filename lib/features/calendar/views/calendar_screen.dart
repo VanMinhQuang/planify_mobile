@@ -72,7 +72,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     child: ListTile(
                       title: Text(plan.title),
                       subtitle: Text(
-                        '${DateFormat.MMMd().format(plan.startDate)} - ${DateFormat.MMMd().format(plan.endDate)}',
+                        _formatRange(plan.startDate, plan.endDate),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push(Routes.planDetailPath(plan.id)),
@@ -84,5 +84,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
         },
       ),
     );
+  }
+
+  String _formatRange(DateTime? startDate, DateTime? endDate) {
+    if (startDate == null || endDate == null) {
+      return 'No date';
+    }
+    return '${DateFormat.MMMd().format(startDate)} - ${DateFormat.MMMd().format(endDate)}';
   }
 }
