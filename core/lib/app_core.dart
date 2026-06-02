@@ -21,6 +21,7 @@ export 'package:dotted_line/dotted_line.dart';
 export 'package:draggable_fab/draggable_fab.dart';
 export 'package:dropdown_button2/dropdown_button2.dart';
 export 'package:easy_localization/easy_localization.dart';
+export 'package:easy_date_timeline/easy_date_timeline.dart' hide DateFormatter;
 export 'package:equatable/equatable.dart';
 export 'package:expandable_page_view/expandable_page_view.dart';
 export 'package:file_picker/file_picker.dart';

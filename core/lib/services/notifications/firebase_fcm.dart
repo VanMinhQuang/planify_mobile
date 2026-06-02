@@ -77,6 +77,14 @@ class FirebaseFCM {
     _tokenRefreshSubscription = null;
   }
 
+  Future<void> handleInitialMessage() async {
+    final message = await FirebaseMessaging.instance.getInitialMessage();
+    if (message == null) return;
+
+    ShowingNotification.onHandleNotification(message.data);
+    ShowingNotification.onReceiveNotification(message.data);
+  }
+
   Future<void> _handleTokenRefresh(String token) async {
     final normalizedToken = token.trim();
     if (normalizedToken.isEmpty || normalizedToken == _lastSubmittedToken) {

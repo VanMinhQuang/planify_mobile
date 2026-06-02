@@ -19,7 +19,7 @@ Future<void> bootstrap({
       await Firebase.initializeApp(options: options);
       await GoogleSignIn.instance.initialize();
       setupDI(config);
-      runApp(const PlanifyApp());
+      runApp(PlanifyApp(firebaseOptions: options));
     },
     (error, stack) {
       developer.log('Uncaught error: $error', stackTrace: stack);

@@ -7,7 +7,6 @@ import 'package:planify_mobile/domain/repository/auth_repository.dart';
 import 'package:planify_mobile/domain/repository/comment_repository.dart';
 import 'package:planify_mobile/domain/repository/feed_repository.dart';
 import 'package:planify_mobile/domain/repository/friend_repository.dart';
-import 'package:planify_mobile/domain/repository/invitation_repository.dart';
 import 'package:planify_mobile/domain/repository/like_repository.dart';
 import 'package:planify_mobile/domain/repository/plan_repository.dart';
 import 'package:planify_mobile/domain/repository/profile_repository.dart';
@@ -25,6 +24,7 @@ class Routes {
   static const calendar = "/calendar";
   static const notifications = "/notifications";
   static const profile = "/profile";
+  static const friends = "/friends";
   static const settings = "/settings";
 
   static String planDetailPath(String planId) => '/plans/$planId';
@@ -97,11 +97,6 @@ GoRouter createRouter(AuthBloc authBloc) {
                   CalendarCubit(planRepository: context.read<PlanRepository>()),
             ),
             BlocProvider(
-              create: (context) => InvitationsCubit(
-                invitationRepository: context.read<InvitationRepository>(),
-              ),
-            ),
-            BlocProvider(
               create: (context) => ProfileCubit(
                 profileRepository: context.read<ProfileRepository>(),
                 uploadRepository: context.read<UploadRepository>(),
@@ -154,6 +149,14 @@ GoRouter createRouter(AuthBloc authBloc) {
             uploadRepository: context.read<UploadRepository>(),
           ),
           child: const ProfileScreen(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.friends,
+        builder: (context, state) => BlocProvider(
+          create: (context) =>
+              FriendsCubit(friendRepository: context.read<FriendRepository>()),
+          child: const FriendListScreen(),
         ),
       ),
       GoRoute(

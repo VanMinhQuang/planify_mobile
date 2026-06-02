@@ -6,6 +6,8 @@ export 'home/pages/calendar/views/calendar_screen.dart';
 export 'home/pages/calendar/bloc/calendar_cubit.dart';
 export 'home/pages/feed/bloc/feed_cubit.dart';
 export 'home/pages/feed/views/feed_screen.dart';
+export 'friends/bloc/friends_cubit.dart';
+export 'friends/views/friend_list_screen.dart';
 export 'home/bloc/home_cubit.dart';
 export 'home/views/home_screen.dart';
 export 'home/pages/invitations/bloc/invitations_cubit.dart';

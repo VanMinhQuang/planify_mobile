@@ -32,7 +32,7 @@ class AuthContainer extends StatelessWidget {
       child: Scaffold(
         extendBody: true,
         extendBodyBehindAppBar: true,
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         backgroundColor: AppColor.white,
         body: GestureDetector(
           onTap: () {
