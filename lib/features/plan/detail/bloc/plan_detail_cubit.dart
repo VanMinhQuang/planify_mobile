@@ -340,12 +340,27 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
     }).toList();
   }
 
-  Future<void> addTask(String title) async {
+  Future<void> addTask(
+    String title, {
+    String? description,
+    String? locationName,
+    double? locationLat,
+    double? locationLng,
+    DateTime? dueDate,
+  }) async {
     final plan = state.plan;
     if (plan == null || title.trim().isEmpty) {
       return;
     }
-    final task = await _planRepository.createTask(plan.id, title.trim());
+    final task = await _planRepository.createTask(
+      plan.id,
+      title.trim(),
+      description: description,
+      locationName: locationName,
+      locationLat: locationLat,
+      locationLng: locationLng,
+      dueDate: dueDate,
+    );
     emit(state.copyWith(tasks: [task, ...state.tasks]));
   }
 

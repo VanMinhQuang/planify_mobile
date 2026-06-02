@@ -108,6 +108,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.people_outline),
+                    title: const Text('Friends'),
+                    subtitle: const Text('View friends and requests'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(Routes.friends),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text('Plans', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 if (state.isLoading)

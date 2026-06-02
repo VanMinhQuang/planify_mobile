@@ -1,8 +1,6 @@
 import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../../app/router.dart';
 import '../../../../../domain/models/plan_invitation.dart';
@@ -32,6 +30,7 @@ class _InvitationsScreenState extends State<InvitationsScreen>
     return AppContainer(
       canGoBack: false,
       appBarTitle: 'Invitation',
+      onRefresh: () => _cubit.load(),
       child: BlocConsumer<InvitationsCubit, InvitationsState>(
         listenWhen: (previous, current) =>
             previous.actionError != current.actionError &&

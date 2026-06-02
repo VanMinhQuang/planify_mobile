@@ -19,7 +19,6 @@ class PlanDetailScreen extends StatefulWidget {
 class _PlanDetailScreenState extends State<PlanDetailScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  final _taskController = TextEditingController();
   final _noteController = TextEditingController();
   late PlanDetailCubit bloc;
 
@@ -33,7 +32,6 @@ class _PlanDetailScreenState extends State<PlanDetailScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    _taskController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -92,7 +90,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen>
                         controller: _tabController,
                         children: [
                           OverviewTab(state: state),
-                          TasksTab(controller: _taskController),
+                          const TasksTab(),
                           NotesTab(controller: _noteController),
                           ActivityTab(state: state),
                         ],

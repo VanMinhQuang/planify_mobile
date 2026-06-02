@@ -6,6 +6,10 @@ class PlanTask extends Equatable {
     required this.planId,
     required this.title,
     required this.isDone,
+    this.description,
+    this.locationName,
+    this.locationLat,
+    this.locationLng,
     this.assignedTo,
     this.dueDate,
   });
@@ -13,10 +17,25 @@ class PlanTask extends Equatable {
   final String id;
   final String planId;
   final String title;
+  final String? description;
+  final String? locationName;
+  final double? locationLat;
+  final double? locationLng;
   final bool isDone;
   final String? assignedTo;
   final DateTime? dueDate;
 
   @override
-  List<Object?> get props => [id, planId, title, isDone, assignedTo, dueDate];
+  List<Object?> get props => [
+    id,
+    planId,
+    title,
+    description,
+    locationName,
+    locationLat,
+    locationLng,
+    isDone,
+    assignedTo,
+    dueDate,
+  ];
 }

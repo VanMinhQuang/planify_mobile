@@ -21,7 +21,15 @@ abstract interface class PlanRepository {
     String? cursor,
   });
 
-  Future<PlanTask> createTask(String planId, String title);
+  Future<PlanTask> createTask(
+    String planId,
+    String title, {
+    String? description,
+    String? locationName,
+    double? locationLat,
+    double? locationLng,
+    DateTime? dueDate,
+  });
 
   Future<PlanTask> updateTaskDone(String planId, String taskId, bool isDone);
 

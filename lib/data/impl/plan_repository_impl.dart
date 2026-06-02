@@ -112,11 +112,30 @@ class PlanRepositoryImpl implements PlanRepository {
   }
 
   @override
-  Future<PlanTask> createTask(String planId, String title) async {
+  Future<PlanTask> createTask(
+    String planId,
+    String title, {
+    String? description,
+    String? locationName,
+    double? locationLat,
+    double? locationLng,
+    DateTime? dueDate,
+  }) async {
     try {
       final result = await _apiClient.post(
         path: ApiUrl.planTasks(planId),
-        body: {'title': title},
+        body: {
+          'title': title,
+          ...?(_blankToNull(description) == null
+              ? null
+              : {'description': description!.trim()}),
+          ...?(_blankToNull(locationName) == null
+              ? null
+              : {'locationName': locationName!.trim()}),
+          ...?(locationLat == null ? null : {'locationLat': locationLat}),
+          ...?(locationLng == null ? null : {'locationLng': locationLng}),
+          ...?(dueDate == null ? null : {'dueDate': dueDate.toIso8601String()}),
+        },
         parser: (json) =>
             PlanTaskDto.fromJson(json as Map<String, dynamic>).toDomain(),
       );
@@ -128,6 +147,11 @@ class PlanRepositoryImpl implements PlanRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  String? _blankToNull(String? value) {
+    final trimmed = value?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
   }
 
   @override
