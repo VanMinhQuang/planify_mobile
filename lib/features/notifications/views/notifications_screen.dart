@@ -19,8 +19,23 @@ class NotificationsScreen extends StatelessWidget {
             return const Center(child: Text('No notifications yet'));
           }
           return ListView.builder(
-            itemCount: state.items.length,
+            itemCount: state.items.length + (state.hasNextPage ? 1 : 0),
             itemBuilder: (context, index) {
+              if (index >= state.items.length) {
+                return Center(
+                  child: TextButton(
+                    onPressed: state.isLoadingMore
+                        ? null
+                        : context.read<NotificationsCubit>().loadMore,
+                    child: state.isLoadingMore
+                        ? const SizedBox.square(
+                            dimension: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Load more'),
+                  ),
+                );
+              }
               final notification = state.items[index];
               return ListTile(
                 leading: Icon(

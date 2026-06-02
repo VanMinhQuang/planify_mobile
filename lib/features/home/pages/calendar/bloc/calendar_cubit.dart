@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/models/plan.dart';
-import '../../../domain/repository/plan_repository.dart';
+import '../../../../../domain/models/plan.dart';
+import '../../../../../domain/repository/plan_repository.dart';
 
 part 'calendar_state.dart';
 
@@ -16,7 +16,15 @@ class CalendarCubit extends Cubit<CalendarState> {
   Future<void> load() async {
     emit(state.copyWith(isLoading: true, error: ''));
     try {
-      final plans = await _planRepository.listPlans();
+      final plans = <Plan>[];
+      String? cursor;
+      var hasNextPage = true;
+      while (hasNextPage) {
+        final page = await _planRepository.listPlans(cursor: cursor, limit: 50);
+        plans.addAll(page.items);
+        cursor = page.nextCursor;
+        hasNextPage = page.hasNextPage;
+      }
       emit(state.copyWith(isLoading: false, plans: plans));
     } catch (error) {
       emit(state.copyWith(isLoading: false, error: error.toString()));

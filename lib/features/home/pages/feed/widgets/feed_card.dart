@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:planify_mobile/app/router.dart';
 import 'package:planify_mobile/domain/models/feed_post.dart';
-import 'package:planify_mobile/features/feed/bloc/feed_cubit.dart';
-import 'package:planify_mobile/features/feed/widgets/feed_comment_modal.dart';
+import 'package:planify_mobile/features/home/pages/feed/bloc/feed_cubit.dart';
+import 'package:planify_mobile/features/home/pages/feed/widgets/feed_comment_modal.dart';
 import 'package:share_plus/share_plus.dart';
 
 class FeedCard extends StatelessWidget {

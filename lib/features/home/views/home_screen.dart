@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _hideController = ScrollToHideController();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -53,6 +53,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 selectedIcon: Icon(Icons.calendar_month),
                 label: '',
               ),
+              const NavigationDestination(
+                icon: Icon(Icons.mail_outline),
+                selectedIcon: Icon(Icons.mail),
+                label: '',
+              ),
               NavigationDestination(
                 icon: _AvatarNavIcon(avatarUrl: avatarUrl),
                 selectedIcon: _AvatarNavIcon(
@@ -68,7 +73,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: TabBarView(
         controller: _tabController,
         physics: const NeverScrollableScrollPhysics(),
-        children: const [FeedScreen(), CalendarScreen(), ProfileScreen()],
+        children: [
+          FeedScreen(scrollToHideController: _hideController),
+          const CalendarScreen(),
+          const InvitationsScreen(),
+          const ProfileScreen(),
+        ],
       ),
     );
   }

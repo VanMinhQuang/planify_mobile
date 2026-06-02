@@ -1,4 +1,5 @@
 import '../../domain/models/app_notification.dart';
+import '../../domain/models/paged_result.dart';
 import '../../domain/repository/notification_repository.dart';
 import '../api/api_client.dart';
 import '../constants/api_url.dart';
@@ -11,19 +12,29 @@ class NotificationRepositoryImpl implements NotificationRepository {
   final ApiClient _apiClient;
 
   @override
-  Future<List<AppNotification>> listNotifications() async {
+  Future<PagedResult<AppNotification>> listNotifications({
+    int limit = 20,
+    String? cursor,
+  }) async {
     try {
       final result = await _apiClient.get(
         path: ApiUrl.notifications,
-        parser: (json) => (json as List<dynamic>)
-            .map(
-              (item) => AppNotificationDto.fromJson(
-                item as Map<String, dynamic>,
-              ).toDomain(),
-            )
-            .toList(),
+        queryParameters: {
+          'limit': limit,
+          ...?(cursor == null ? null : {'cursor': cursor}),
+        },
+        parser: (json) => PagedResult.fromJson(
+          json,
+          (item) => AppNotificationDto.fromJson(item).toDomain(),
+        ),
       );
-      return result ?? [];
+      return result ??
+          const PagedResult(
+            items: [],
+            nextCursor: null,
+            hasNextPage: false,
+            totalCount: 0,
+          );
     } catch (e) {
       rethrow;
     }

@@ -1,4 +1,5 @@
 import '../../domain/models/activity_entry.dart';
+import '../../domain/models/paged_result.dart';
 import '../../domain/models/plan.dart';
 import '../../domain/models/plan_note.dart';
 import '../../domain/models/plan_task.dart';
@@ -16,17 +17,29 @@ class PlanRepositoryImpl implements PlanRepository {
   final ApiClient _apiClient;
 
   @override
-  Future<List<Plan>> listPlans({String? status}) async {
+  Future<PagedResult<Plan>> listPlans({
+    String? status,
+    int limit = 20,
+    String? cursor,
+  }) async {
     try {
       final result = await _apiClient.get(
         path: ApiUrl.plans,
-        queryParameters: status == null ? null : {'status': status},
-        parser: (json) => _mapList(
-          json,
-          PlanDto.fromJson,
-        ).map((item) => item.toDomain()).toList(),
+        queryParameters: {
+          ...?(status == null ? null : {'status': status}),
+          'limit': limit,
+          ...?(cursor == null ? null : {'cursor': cursor}),
+        },
+        parser: (json) =>
+            _mapPage(json, PlanDto.fromJson, (item) => item.toDomain()),
       );
-      return result ?? [];
+      return result ??
+          const PagedResult(
+            items: [],
+            nextCursor: null,
+            hasNextPage: false,
+            totalCount: 0,
+          );
     } catch (e) {
       rethrow;
     }
@@ -71,16 +84,28 @@ class PlanRepositoryImpl implements PlanRepository {
   }
 
   @override
-  Future<List<PlanTask>> listTasks(String planId) async {
+  Future<PagedResult<PlanTask>> listTasks(
+    String planId, {
+    int limit = 20,
+    String? cursor,
+  }) async {
     try {
       final result = await _apiClient.get(
         path: ApiUrl.planTasks(planId),
-        parser: (json) => _mapList(
-          json,
-          PlanTaskDto.fromJson,
-        ).map((item) => item.toDomain()).toList(),
+        queryParameters: {
+          'limit': limit,
+          ...?(cursor == null ? null : {'cursor': cursor}),
+        },
+        parser: (json) =>
+            _mapPage(json, PlanTaskDto.fromJson, (item) => item.toDomain()),
       );
-      return result ?? [];
+      return result ??
+          const PagedResult(
+            items: [],
+            nextCursor: null,
+            hasNextPage: false,
+            totalCount: 0,
+          );
     } catch (e) {
       rethrow;
     }
@@ -129,16 +154,28 @@ class PlanRepositoryImpl implements PlanRepository {
   }
 
   @override
-  Future<List<PlanNote>> listNotes(String planId) async {
+  Future<PagedResult<PlanNote>> listNotes(
+    String planId, {
+    int limit = 20,
+    String? cursor,
+  }) async {
     try {
       final result = await _apiClient.get(
         path: ApiUrl.planNotes(planId),
-        parser: (json) => _mapList(
-          json,
-          PlanNoteDto.fromJson,
-        ).map((item) => item.toDomain()).toList(),
+        queryParameters: {
+          'limit': limit,
+          ...?(cursor == null ? null : {'cursor': cursor}),
+        },
+        parser: (json) =>
+            _mapPage(json, PlanNoteDto.fromJson, (item) => item.toDomain()),
       );
-      return result ?? [];
+      return result ??
+          const PagedResult(
+            items: [],
+            nextCursor: null,
+            hasNextPage: false,
+            totalCount: 0,
+          );
     } catch (e) {
       rethrow;
     }
@@ -164,16 +201,31 @@ class PlanRepositoryImpl implements PlanRepository {
   }
 
   @override
-  Future<List<ActivityEntry>> listActivity(String planId) async {
+  Future<PagedResult<ActivityEntry>> listActivity(
+    String planId, {
+    int limit = 20,
+    String? cursor,
+  }) async {
     try {
       final result = await _apiClient.get(
         path: ApiUrl.planActivity(planId),
-        parser: (json) => _mapList(
+        queryParameters: {
+          'limit': limit,
+          ...?(cursor == null ? null : {'cursor': cursor}),
+        },
+        parser: (json) => _mapPage(
           json,
           ActivityEntryDto.fromJson,
-        ).map((item) => item.toDomain()).toList(),
+          (item) => item.toDomain(),
+        ),
       );
-      return result ?? [];
+      return result ??
+          const PagedResult(
+            items: [],
+            nextCursor: null,
+            hasNextPage: false,
+            totalCount: 0,
+          );
     } catch (e) {
       rethrow;
     }
@@ -196,12 +248,11 @@ class PlanRepositoryImpl implements PlanRepository {
     }
   }
 
-  List<T> _mapList<T>(
+  PagedResult<R> _mapPage<T, R>(
     dynamic json,
     T Function(Map<String, dynamic> item) fromJson,
+    R Function(T item) toDomain,
   ) {
-    return (json as List<dynamic>)
-        .map((item) => fromJson(item as Map<String, dynamic>))
-        .toList();
+    return PagedResult.fromJson(json, (item) => toDomain(fromJson(item)));
   }
 }

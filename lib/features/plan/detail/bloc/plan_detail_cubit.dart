@@ -37,7 +37,7 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
           ? _friendRepository.listFriends()
           : Future<List<Friendship>>.value(const []);
       if (!canViewMemberContent) {
-        final comments = await commentsFuture;
+        final commentsPage = await commentsFuture;
         emit(
           state.copyWith(
             isLoading: false,
@@ -45,28 +45,42 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
             tasks: const [],
             notes: const [],
             activity: const [],
-            comments: comments,
+            comments: commentsPage.items,
+            commentsNextCursor: commentsPage.nextCursor,
+            commentsHasNextPage: commentsPage.hasNextPage,
           ),
         );
         return;
       }
 
-      final results = await Future.wait([
+      final results = await Future.wait<dynamic>([
         _planRepository.listTasks(planId),
         _planRepository.listNotes(planId),
         _planRepository.listActivity(planId),
         commentsFuture,
         friendsFuture,
       ]);
+      final tasksPage = results[0] as PagedResult<PlanTask>;
+      final notesPage = results[1] as PagedResult<PlanNote>;
+      final activityPage = results[2] as PagedResult<ActivityEntry>;
+      final commentsPage = results[3] as PagedResult<PlanComment>;
       final friendships = results[4] as List<Friendship>;
       emit(
         state.copyWith(
           isLoading: false,
           plan: plan,
-          tasks: results[0] as List<PlanTask>,
-          notes: results[1] as List<PlanNote>,
-          activity: results[2] as List<ActivityEntry>,
-          comments: results[3] as List<PlanComment>,
+          tasks: tasksPage.items,
+          tasksNextCursor: tasksPage.nextCursor,
+          tasksHasNextPage: tasksPage.hasNextPage,
+          notes: notesPage.items,
+          notesNextCursor: notesPage.nextCursor,
+          notesHasNextPage: notesPage.hasNextPage,
+          activity: activityPage.items,
+          activityNextCursor: activityPage.nextCursor,
+          activityHasNextPage: activityPage.hasNextPage,
+          comments: commentsPage.items,
+          commentsNextCursor: commentsPage.nextCursor,
+          commentsHasNextPage: commentsPage.hasNextPage,
           friends: _inviteableFriends(plan, friendships),
         ),
       );
@@ -91,6 +105,114 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
       );
     } catch (error) {
       emit(state.copyWith(isLoadingFriends: false, message: error.toString()));
+    }
+  }
+
+  Future<void> loadMoreComments() async {
+    final plan = state.plan;
+    if (plan == null ||
+        !state.commentsHasNextPage ||
+        state.isLoadingMoreComments) {
+      return;
+    }
+    emit(state.copyWith(isLoadingMoreComments: true));
+    try {
+      final page = await _commentRepository.listComments(
+        plan.id,
+        cursor: state.commentsNextCursor,
+      );
+      emit(
+        state.copyWith(
+          comments: [...state.comments, ...page.items],
+          commentsNextCursor: page.nextCursor,
+          commentsHasNextPage: page.hasNextPage,
+          isLoadingMoreComments: false,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(isLoadingMoreComments: false, message: error.toString()),
+      );
+    }
+  }
+
+  Future<void> loadMoreTasks() async {
+    final plan = state.plan;
+    if (plan == null || !state.tasksHasNextPage || state.isLoadingMoreTasks) {
+      return;
+    }
+    emit(state.copyWith(isLoadingMoreTasks: true));
+    try {
+      final page = await _planRepository.listTasks(
+        plan.id,
+        cursor: state.tasksNextCursor,
+      );
+      emit(
+        state.copyWith(
+          tasks: [...state.tasks, ...page.items],
+          tasksNextCursor: page.nextCursor,
+          tasksHasNextPage: page.hasNextPage,
+          isLoadingMoreTasks: false,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(isLoadingMoreTasks: false, message: error.toString()),
+      );
+    }
+  }
+
+  Future<void> loadMoreNotes() async {
+    final plan = state.plan;
+    if (plan == null || !state.notesHasNextPage || state.isLoadingMoreNotes) {
+      return;
+    }
+    emit(state.copyWith(isLoadingMoreNotes: true));
+    try {
+      final page = await _planRepository.listNotes(
+        plan.id,
+        cursor: state.notesNextCursor,
+      );
+      emit(
+        state.copyWith(
+          notes: [...state.notes, ...page.items],
+          notesNextCursor: page.nextCursor,
+          notesHasNextPage: page.hasNextPage,
+          isLoadingMoreNotes: false,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(isLoadingMoreNotes: false, message: error.toString()),
+      );
+    }
+  }
+
+  Future<void> loadMoreActivity() async {
+    final plan = state.plan;
+    if (plan == null ||
+        !state.activityHasNextPage ||
+        state.isLoadingMoreActivity) {
+      return;
+    }
+    emit(state.copyWith(isLoadingMoreActivity: true));
+    try {
+      final page = await _planRepository.listActivity(
+        plan.id,
+        cursor: state.activityNextCursor,
+      );
+      emit(
+        state.copyWith(
+          activity: [...state.activity, ...page.items],
+          activityNextCursor: page.nextCursor,
+          activityHasNextPage: page.hasNextPage,
+          isLoadingMoreActivity: false,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(isLoadingMoreActivity: false, message: error.toString()),
+      );
     }
   }
 

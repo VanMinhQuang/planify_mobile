@@ -130,6 +130,35 @@ class ApiClient {
     }
   }
 
+  Future<T?> uploadFiles<T>({
+    required String path,
+    required List<String> filePaths,
+    String fieldName = 'files',
+    Map<String, dynamic> fields = const {},
+    Duration timeout = const Duration(seconds: 120),
+  }) async {
+    try {
+      final res = await _service
+          .uploadFiles(
+            filePaths: filePaths,
+            url: path,
+            fieldName: fieldName,
+            fields: fields,
+          )
+          .timeout(timeout);
+
+      final data = res.data;
+
+      if (data['success'] == false) {
+        throw _extractMessage(data);
+      }
+
+      return data as T?;
+    } catch (e) {
+      throw _extractMessage(e);
+    }
+  }
+
   Future<AuthSession> authenticate<t>({
     required String path,
     required dynamic body,

@@ -131,6 +131,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _goNext(AuthStatus status) async {
     await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) {
+      return;
+    }
     if (!_animationDone || _didNavigate) {
       return;
     }

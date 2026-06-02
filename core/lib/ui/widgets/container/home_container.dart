@@ -43,7 +43,13 @@ class _HomeContainerState extends State<HomeContainer> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: widget.child,
       ),
-      bottomNavigationBar: widget.bottomNavBar,
+      bottomNavigationBar: widget.bottomNavBar != null
+          ? ScrollToHide(
+              controller: widget.hideController,
+              scrollController: _scrollController,
+              child: widget.bottomNavBar,
+            )
+          : null,
     );
   }
 }

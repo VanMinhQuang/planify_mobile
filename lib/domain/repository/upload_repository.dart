@@ -9,6 +9,12 @@ abstract interface class UploadRepository {
     String mode,
   });
 
+  Future<List<String>> uploadPlanImages({
+    required String planId,
+    required List<File> files,
+    String mode,
+  });
+
   Future<String> uploadAvatar({required File file, String mode});
 
   Future<Plan> attachCoverUrl(String planId, String url);

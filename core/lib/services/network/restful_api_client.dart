@@ -50,6 +50,34 @@ abstract class RestApiClient extends AbstractNetworkClient {
     );
   }
 
+  Future<Response<dynamic>> uploadFiles({
+    required List<String> filePaths,
+    required String url,
+    String fieldName = 'files',
+    Map<String, dynamic> fields = const {},
+  }) async {
+    final files = <MultipartFile>[];
+    for (final filePath in filePaths) {
+      final fileName = filePath.split('/').last;
+      files.add(await MultipartFile.fromFile(filePath, filename: fileName));
+    }
+
+    final formData = FormData.fromMap({...fields, fieldName: files});
+
+    return executeRequest(
+      () => dio.post(
+        url,
+        data: formData,
+        options: Options(
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "multipart/form-data",
+          },
+        ),
+      ),
+    );
+  }
+
   Future<Response<dynamic>> put(String path, {dynamic data, Options? options}) {
     return executeRequest(() => dio.put(path, data: data, options: options));
   }

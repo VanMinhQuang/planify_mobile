@@ -16,7 +16,7 @@ class FriendModal extends StatelessWidget {
           final friends = sheetState.friends;
           return SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+              padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 10.w),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -28,6 +28,30 @@ class UploadRepositoryImpl implements UploadRepository {
   }
 
   @override
+  Future<List<String>> uploadPlanImages({
+    required String planId,
+    required List<File> files,
+    String mode = 'r2',
+  }) async {
+    if (mode != 'iis' && mode != 'r2') {
+      throw UnsupportedError('Unsupported upload mode: $mode');
+    }
+    if (files.isEmpty) {
+      return const [];
+    }
+    final response = await _apiClient.uploadFiles<Map<String, dynamic>>(
+      path: ApiUrl.uploadMultiple(mode),
+      filePaths: files.map((file) => file.path).toList(),
+      fields: {'kind': 'PLAN_COVER', 'planId': planId},
+    );
+    final uploadedFiles = response?['files'] as List<dynamic>? ?? [];
+    return uploadedFiles
+        .map((item) => (item as Map<String, dynamic>)['publicUrl'] as String?)
+        .whereType<String>()
+        .toList();
+  }
+
+  @override
   Future<String> uploadAvatar({required File file, String mode = 'iis'}) async {
     if (mode != 'iis' && mode != 'r2') {
       throw UnsupportedError('Unsupported upload mode: $mode');

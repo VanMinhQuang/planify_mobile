@@ -1,10 +1,11 @@
+import 'package:app_core/ui/widgets/container/app_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../../app/router.dart';
+import '../../../../../app/router.dart';
 import '../bloc/calendar_cubit.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -24,7 +25,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    return SafeArea(
+    return AppContainer(
+      canGoBack: false,
+      appBarTitle: 'Calendar',
       child: BlocBuilder<CalendarCubit, CalendarState>(
         builder: (context, state) {
           final cubit = context.read<CalendarCubit>();
@@ -32,10 +35,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
             children: [
-              Text(
-                'Calendar',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
               const SizedBox(height: 12),
               if (state.isLoading) const LinearProgressIndicator(),
               Card(

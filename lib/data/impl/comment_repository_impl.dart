@@ -1,3 +1,4 @@
+import '../../domain/models/paged_result.dart';
 import '../../domain/models/plan_comment.dart';
 import '../../domain/repository/comment_repository.dart';
 import '../api/api_client.dart';
@@ -11,15 +12,29 @@ class CommentRepositoryImpl implements CommentRepository {
   final ApiClient _apiClient;
 
   @override
-  Future<List<PlanComment>> listComments(String planId) async {
+  Future<PagedResult<PlanComment>> listComments(
+    String planId, {
+    int limit = 20,
+    String? cursor,
+  }) async {
     final result = await _apiClient.get(
       path: ApiUrl.planComments(planId),
-      parser: (json) => (json as List<dynamic>)
-          .map((item) => PlanCommentDto.fromJson(item as Map<String, dynamic>))
-          .map((item) => item.toDomain())
-          .toList(),
+      queryParameters: {
+        'limit': limit,
+        ...?(cursor == null ? null : {'cursor': cursor}),
+      },
+      parser: (json) => PagedResult.fromJson(
+        json,
+        (item) => PlanCommentDto.fromJson(item).toDomain(),
+      ),
     );
-    return result ?? [];
+    return result ??
+        const PagedResult(
+          items: [],
+          nextCursor: null,
+          hasNextPage: false,
+          totalCount: 0,
+        );
   }
 
   @override

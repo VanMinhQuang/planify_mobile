@@ -1,4 +1,5 @@
 import '../../domain/models/feed_post.dart';
+import '../../domain/models/paged_result.dart';
 import '../../domain/repository/feed_repository.dart';
 import '../api/api_client.dart';
 import '../constants/api_url.dart';
@@ -10,14 +11,27 @@ class FeedRepositoryImpl implements FeedRepository {
   final ApiClient _apiClient;
 
   @override
-  Future<List<FeedPost>> listFeed() async {
+  Future<PagedResult<FeedPost>> listFeed({
+    int limit = 20,
+    String? cursor,
+  }) async {
     final result = await _apiClient.get(
       path: ApiUrl.feed,
-      parser: (json) => (json as List<dynamic>)
-          .map((item) => FeedPostDto.fromJson(item as Map<String, dynamic>))
-          .map((item) => item.toDomain())
-          .toList(),
+      queryParameters: {
+        'limit': limit,
+        ...?(cursor == null ? null : {'cursor': cursor}),
+      },
+      parser: (json) => PagedResult.fromJson(
+        json,
+        (item) => FeedPostDto.fromJson(item).toDomain(),
+      ),
     );
-    return result ?? [];
+    return result ??
+        const PagedResult(
+          items: [],
+          nextCursor: null,
+          hasNextPage: false,
+          totalCount: 0,
+        );
   }
 }

@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/models/app_user.dart';
-import '../../../domain/models/user_profile.dart';
-import '../../../domain/repository/profile_repository.dart';
-import '../../../domain/repository/upload_repository.dart';
+import '../../../../../domain/models/app_user.dart';
+import '../../../../../domain/models/user_profile.dart';
+import '../../../../../domain/repository/profile_repository.dart';
+import '../../../../../domain/repository/upload_repository.dart';
 
 part 'profile_state.dart';
 

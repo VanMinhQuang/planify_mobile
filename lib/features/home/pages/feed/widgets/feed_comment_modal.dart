@@ -1,9 +1,10 @@
 import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
 import 'package:planify_mobile/domain/models/feed_post.dart';
+import 'package:planify_mobile/domain/models/paged_result.dart';
 import 'package:planify_mobile/domain/models/plan_comment.dart';
 import 'package:planify_mobile/domain/repository/comment_repository.dart';
-import 'package:planify_mobile/features/feed/bloc/feed_cubit.dart';
+import 'package:planify_mobile/features/home/pages/feed/bloc/feed_cubit.dart';
 
 class CommentsSheet extends StatefulWidget {
   const CommentsSheet({super.key, required this.post});
@@ -16,9 +17,12 @@ class CommentsSheet extends StatefulWidget {
 
 class _CommentsSheetState extends State<CommentsSheet> {
   final _controller = TextEditingController();
-  late Future<List<PlanComment>> _future;
+  late Future<PagedResult<PlanComment>> _future;
   List<PlanComment> _comments = [];
   bool _isPosting = false;
+  bool _isLoadingMore = false;
+  String? _nextCursor;
+  bool _hasNextPage = false;
   PlanComment? _replyingTo;
 
   @override
@@ -28,7 +32,9 @@ class _CommentsSheetState extends State<CommentsSheet> {
         .read<CommentRepository>()
         .listComments(widget.post.plan.id)
         .then((value) {
-          _comments = value;
+          _comments = value.items;
+          _nextCursor = value.nextCursor;
+          _hasNextPage = value.hasNextPage;
           return value;
         });
   }
@@ -82,7 +88,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
                     ),
                   ),
                   Expanded(
-                    child: FutureBuilder<List<PlanComment>>(
+                    child: FutureBuilder<PagedResult<PlanComment>>(
                       future: _future,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
@@ -104,8 +110,23 @@ class _CommentsSheetState extends State<CommentsSheet> {
                         return ListView.builder(
                           controller: scrollController,
                           padding: const EdgeInsets.only(bottom: 8),
-                          itemCount: _comments.length,
+                          itemCount: _comments.length + (_hasNextPage ? 1 : 0),
                           itemBuilder: (context, index) {
+                            if (index >= _comments.length) {
+                              return Center(
+                                child: TextButton(
+                                  onPressed: _isLoadingMore ? null : _loadMore,
+                                  child: _isLoadingMore
+                                      ? const SizedBox.square(
+                                          dimension: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Text('Load more comments'),
+                                ),
+                              );
+                            }
                             final comment = _comments[index];
                             return _SheetCommentTile(
                               comment: comment,
@@ -217,6 +238,32 @@ class _CommentsSheetState extends State<CommentsSheet> {
     } catch (_) {
       if (mounted) {
         setState(() => _isPosting = false);
+      }
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (!_hasNextPage || _isLoadingMore) {
+      return;
+    }
+    setState(() => _isLoadingMore = true);
+    try {
+      final page = await context.read<CommentRepository>().listComments(
+        widget.post.plan.id,
+        cursor: _nextCursor,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _comments = [..._comments, ...page.items];
+        _nextCursor = page.nextCursor;
+        _hasNextPage = page.hasNextPage;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingMore = false);
       }
     }
   }

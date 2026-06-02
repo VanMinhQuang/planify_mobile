@@ -33,7 +33,7 @@ class DefaultAppBar extends StatelessWidget {
               child: Icon(Icons.arrow_back_rounded, size: 18.sp),
             )
           else
-            SizedBox.square(dimension: 18.h),
+            SizedBox.shrink(),
 
           // ── Center: title ────────────────────────────
           Expanded(

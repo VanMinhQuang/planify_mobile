@@ -1,18 +1,13 @@
 import 'package:app_core/app_core.dart';
-import 'package:app_core/ui/widgets/container/app_container.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:planify_mobile/features/auth/bloc/auth_bloc.dart';
+import 'package:planify_mobile/features/plan/detail/bloc/plan_detail_cubit.dart';
+import 'package:planify_mobile/features/plan/detail/view/tabs/activity_tab.dart';
+import 'package:planify_mobile/features/plan/detail/view/tabs/notes_tab.dart';
 import 'package:planify_mobile/features/plan/detail/view/tabs/overview_tab.dart';
+import 'package:planify_mobile/features/plan/detail/view/tabs/task_tab.dart';
 import 'package:planify_mobile/features/plan/detail/widgets/modal/friend_modal.dart';
-import 'package:planify_mobile/features/plan/widgets/comment_tile.dart';
 import 'package:share_plus/share_plus.dart';
-
-import '../../../../domain/models/app_user.dart';
-import '../../../../domain/models/plan_comment.dart';
-import '../../../../domain/models/plan_task.dart';
-import '../../../auth/bloc/auth_bloc.dart';
-import '../bloc/plan_detail_cubit.dart';
 
 class PlanDetailScreen extends StatefulWidget {
   const PlanDetailScreen({super.key});
@@ -81,13 +76,28 @@ class _PlanDetailScreenState extends State<PlanDetailScreen>
           child: state.isLoading
               ? const Center(child: CircularProgressIndicator())
               : canViewMemberContent
-              ? TabBarView(
-                  controller: _tabController,
+              ? Column(
                   children: [
-                    OverviewTab(state: state),
-                    _TasksTab(controller: _taskController),
-                    _NotesTab(controller: _noteController),
-                    _ActivityTab(state: state),
+                    TabBar(
+                      controller: _tabController,
+                      tabs: const [
+                        Tab(text: 'Overview'),
+                        Tab(text: 'Tasks'),
+                        Tab(text: 'Notes'),
+                        Tab(text: 'Activity'),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          OverviewTab(state: state),
+                          TasksTab(controller: _taskController),
+                          NotesTab(controller: _noteController),
+                          ActivityTab(state: state),
+                        ],
+                      ),
+                    ),
                   ],
                 )
               : OverviewTab(state: state),
@@ -108,136 +118,6 @@ class _PlanDetailScreenState extends State<PlanDetailScreen>
       context: context,
       builder: (sheetContext) {
         return FriendModal(bloc: bloc);
-      },
-    );
-  }
-}
-
-class _TasksTab extends StatelessWidget {
-  const _TasksTab({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<PlanDetailCubit>().state;
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(labelText: 'New task'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton.filled(
-                tooltip: 'Add task',
-                onPressed: () {
-                  context.read<PlanDetailCubit>().addTask(controller.text);
-                  controller.clear();
-                },
-                icon: const Icon(Icons.add),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: state.tasks.length,
-            itemBuilder: (context, index) {
-              final task = state.tasks[index];
-              return _TaskTile(task: task);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TaskTile extends StatelessWidget {
-  const _TaskTile({required this.task});
-
-  final PlanTask task;
-
-  @override
-  Widget build(BuildContext context) {
-    return CheckboxListTile(
-      value: task.isDone,
-      onChanged: (_) => context.read<PlanDetailCubit>().toggleTask(task),
-      title: Text(task.title),
-    );
-  }
-}
-
-class _NotesTab extends StatelessWidget {
-  const _NotesTab({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<PlanDetailCubit>().state;
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: TextField(
-            controller: controller,
-            minLines: 2,
-            maxLines: 4,
-            decoration: InputDecoration(
-              labelText: 'Add note',
-              suffixIcon: IconButton(
-                tooltip: 'Save note',
-                onPressed: () {
-                  context.read<PlanDetailCubit>().addNote(controller.text);
-                  controller.clear();
-                },
-                icon: const Icon(Icons.send_outlined),
-              ),
-            ),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: state.notes.length,
-            itemBuilder: (context, index) {
-              final note = state.notes[index];
-              return ListTile(
-                title: Text(note.content),
-                subtitle: Text(note.createdAt.toLocal().toString()),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ActivityTab extends StatelessWidget {
-  const _ActivityTab({required this.state});
-
-  final PlanDetailState state;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: state.activity.length,
-      itemBuilder: (context, index) {
-        final entry = state.activity[index];
-        return ListTile(
-          leading: const Icon(Icons.history),
-          title: Text(entry.action),
-          subtitle: Text(
-            entry.targetTitle ?? entry.createdAt.toLocal().toString(),
-          ),
-        );
       },
     );
   }

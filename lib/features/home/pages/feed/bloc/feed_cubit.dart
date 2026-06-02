@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/models/feed_post.dart';
-import '../../../domain/repository/feed_repository.dart';
-import '../../../domain/repository/like_repository.dart';
+import '../../../../../domain/models/feed_post.dart';
+import '../../../../../domain/repository/feed_repository.dart';
+import '../../../../../domain/repository/like_repository.dart';
 
 part 'feed_state.dart';
 
@@ -21,14 +21,41 @@ class FeedCubit extends Cubit<FeedState> {
   Future<void> load() async {
     emit(state.copyWith(isLoading: true, error: ''));
     try {
-      final posts = await _feedRepository.listFeed();
-      emit(state.copyWith(isLoading: false, posts: posts));
+      final page = await _feedRepository.listFeed();
+      emit(
+        state.copyWith(
+          isLoading: false,
+          posts: page.items,
+          nextCursor: page.nextCursor,
+          hasNextPage: page.hasNextPage,
+        ),
+      );
     } catch (error) {
       emit(state.copyWith(isLoading: false, error: error.toString()));
     }
   }
 
   Future<void> refresh() => load();
+
+  Future<void> loadMore() async {
+    if (!state.hasNextPage || state.isLoadingMore) {
+      return;
+    }
+    emit(state.copyWith(isLoadingMore: true, error: ''));
+    try {
+      final page = await _feedRepository.listFeed(cursor: state.nextCursor);
+      emit(
+        state.copyWith(
+          posts: [...state.posts, ...page.items],
+          nextCursor: page.nextCursor,
+          hasNextPage: page.hasNextPage,
+          isLoadingMore: false,
+        ),
+      );
+    } catch (error) {
+      emit(state.copyWith(isLoadingMore: false, error: error.toString()));
+    }
+  }
 
   Future<void> toggleLike(FeedPost post) async {
     if (state.isLikingPlanIds.contains(post.plan.id)) {

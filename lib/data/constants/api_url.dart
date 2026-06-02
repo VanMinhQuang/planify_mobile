@@ -11,6 +11,7 @@ class ApiUrl {
   static const friends = '/friends';
   static const friendRequests = '/friends/requests';
   static const usersSearch = '/users/search';
+  static const invitations = '/invitations';
   static const notifications = '/notifications';
   static const deviceTokens = '/device-tokens';
 
@@ -32,7 +33,13 @@ class ApiUrl {
   static String rejectFriendRequest(String requestId) =>
       '/friends/requests/$requestId/reject';
   static String planInvites(String planId) => '/plans/$planId/invites';
+  static String invitation(String inviteId) => '/invitations/$inviteId';
+  static String acceptInvitation(String inviteId) =>
+      '/invitations/$inviteId/accept';
+  static String declineInvitation(String inviteId) =>
+      '/invitations/$inviteId/decline';
   static String notificationRead(String notificationId) =>
       '/notifications/$notificationId/read';
   static String upload(String driver) => '/uploads/$driver';
+  static String uploadMultiple(String driver) => '/uploads/$driver/multiple';
 }

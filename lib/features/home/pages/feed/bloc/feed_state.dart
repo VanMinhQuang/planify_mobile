@@ -7,6 +7,9 @@ class FeedState extends Equatable {
     this.error = '',
     this.commentDraftByPlanId = const {},
     this.isLikingPlanIds = const {},
+    this.nextCursor,
+    this.hasNextPage = false,
+    this.isLoadingMore = false,
   });
 
   final bool isLoading;
@@ -14,6 +17,9 @@ class FeedState extends Equatable {
   final String error;
   final Map<String, String> commentDraftByPlanId;
   final Set<String> isLikingPlanIds;
+  final String? nextCursor;
+  final bool hasNextPage;
+  final bool isLoadingMore;
 
   FeedState copyWith({
     bool? isLoading,
@@ -21,6 +27,9 @@ class FeedState extends Equatable {
     String? error,
     Map<String, String>? commentDraftByPlanId,
     Set<String>? isLikingPlanIds,
+    Object? nextCursor = _unchanged,
+    bool? hasNextPage,
+    bool? isLoadingMore,
   }) {
     return FeedState(
       isLoading: isLoading ?? this.isLoading,
@@ -28,6 +37,11 @@ class FeedState extends Equatable {
       error: error ?? this.error,
       commentDraftByPlanId: commentDraftByPlanId ?? this.commentDraftByPlanId,
       isLikingPlanIds: isLikingPlanIds ?? this.isLikingPlanIds,
+      nextCursor: nextCursor == _unchanged
+          ? this.nextCursor
+          : nextCursor as String?,
+      hasNextPage: hasNextPage ?? this.hasNextPage,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 
@@ -38,5 +52,10 @@ class FeedState extends Equatable {
     error,
     commentDraftByPlanId,
     isLikingPlanIds,
+    nextCursor,
+    hasNextPage,
+    isLoadingMore,
   ];
 }
+
+const _unchanged = Object();

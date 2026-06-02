@@ -16,6 +16,7 @@ class PlanDto {
     required this.commentCount,
     required this.likeCount,
     required this.likedByMe,
+    this.imageUrls = const [],
     this.description,
     this.coverImageUrl,
     this.members = const [],
@@ -36,10 +37,12 @@ class PlanDto {
   final int likeCount;
   final bool likedByMe;
   final List<MemberDto> members;
+  final List<String> imageUrls;
 
   factory PlanDto.fromJson(Map<String, dynamic> json) {
     final count = json['_count'] as Map<String, dynamic>?;
     final likes = json['likes'] as List<dynamic>? ?? [];
+    final uploadedFiles = json['uploadedFiles'] as List<dynamic>? ?? [];
     return PlanDto(
       id: json['id'] as String,
       title: json['title'] as String? ?? '',
@@ -55,6 +58,10 @@ class PlanDto {
       commentCount: count?['comments'] as int? ?? 0,
       likeCount: count?['likes'] as int? ?? 0,
       likedByMe: likes.isNotEmpty,
+      imageUrls: uploadedFiles
+          .map((item) => (item as Map<String, dynamic>)['publicUrl'] as String?)
+          .whereType<String>()
+          .toList(),
       members:
           (json['members'] as List<dynamic>?)
               ?.map((item) => MemberDto.fromJson(item as Map<String, dynamic>))
@@ -97,6 +104,7 @@ class PlanDto {
       commentCount: commentCount,
       likeCount: likeCount,
       likedByMe: likedByMe,
+      imageUrls: imageUrls,
       memberUserIds: members
           .map((member) => member.userId)
           .whereType<String>()

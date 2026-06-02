@@ -34,25 +34,32 @@ class _OverviewTabState extends State<OverviewTab> {
       return const Center(child: Text('Plan not found'));
     }
     final daysLeft = plan.startDate?.difference(DateTime.now()).inDays ?? 0;
+    final imageUrls = plan.imageUrls.isNotEmpty
+        ? plan.imageUrls
+        : [if (plan.coverImageUrl?.isNotEmpty == true) plan.coverImageUrl!];
     return Column(
       children: [
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             children: [
-              if (plan.coverImageUrl?.isNotEmpty == true)
+              if (imageUrls.isNotEmpty)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: AspectRatio(
                     aspectRatio: 16 / 10,
-                    child: CachedNetworkImage(
-                      imageUrl: plan.coverImageUrl!,
-                      fit: BoxFit.cover,
+                    child: PageView.builder(
+                      itemCount: imageUrls.length,
+                      itemBuilder: (context, index) {
+                        return CachedNetworkImage(
+                          imageUrl: imageUrls[index],
+                          fit: BoxFit.cover,
+                        );
+                      },
                     ),
                   ),
                 ),
-              if (plan.coverImageUrl?.isNotEmpty == true)
-                const SizedBox(height: 12),
+              if (imageUrls.isNotEmpty) const SizedBox(height: 12),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -114,6 +121,20 @@ class _OverviewTabState extends State<OverviewTab> {
                       bloc.setReplyingTo(comment);
                       _commentController.clear();
                     },
+                  ),
+                ),
+              if (state.commentsHasNextPage)
+                Center(
+                  child: TextButton(
+                    onPressed: state.isLoadingMoreComments
+                        ? null
+                        : bloc.loadMoreComments,
+                    child: state.isLoadingMoreComments
+                        ? const SizedBox.square(
+                            dimension: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Load more comments'),
                   ),
                 ),
             ],

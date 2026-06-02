@@ -1,14 +1,14 @@
 import 'dart:io';
 
+import 'package:app_core/ui/widgets/container/app_container.dart';
 import 'package:app_core/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 
-import '../../../app/router.dart';
-import '../../auth/bloc/auth_bloc.dart';
+import '../../../../../app/router.dart';
+import '../../../../auth/bloc/auth_bloc.dart';
 import '../bloc/profile_cubit.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -31,7 +31,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final authUser = context.select((AuthBloc bloc) => bloc.state.user);
-    return SafeArea(
+    return AppContainer(
+      canGoBack: false,
+      appBarTitle: 'User',
+      iconRight: IconButton(
+        tooltip: 'Settings',
+        onPressed: () => context.push(Routes.settings),
+        icon: const Icon(Icons.settings_outlined),
+      ),
       child: BlocConsumer<ProfileCubit, ProfileState>(
         listenWhen: (previous, current) =>
             previous.updatedUser != current.updatedUser,
@@ -53,20 +60,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
               children: [
-                Row(
-                  children: [
-                    Text(
-                      'User',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      tooltip: 'Settings',
-                      onPressed: () => context.push(Routes.settings),
-                      icon: const Icon(Icons.settings_outlined),
-                    ),
-                  ],
-                ),
                 const SizedBox(height: 12),
                 Center(
                   child: Stack(

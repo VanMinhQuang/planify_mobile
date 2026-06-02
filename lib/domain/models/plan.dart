@@ -22,6 +22,7 @@ class Plan extends Equatable {
     this.likeCount = 0,
     this.likedByMe = false,
     this.memberUserIds = const [],
+    this.imageUrls = const [],
   });
 
   final String id;
@@ -39,6 +40,7 @@ class Plan extends Equatable {
   final int likeCount;
   final bool likedByMe;
   final List<String> memberUserIds;
+  final List<String> imageUrls;
 
   Plan copyWith({
     String? id,
@@ -56,6 +58,7 @@ class Plan extends Equatable {
     int? likeCount,
     bool? likedByMe,
     List<String>? memberUserIds,
+    List<String>? imageUrls,
   }) {
     return Plan(
       id: id ?? this.id,
@@ -73,6 +76,7 @@ class Plan extends Equatable {
       likeCount: likeCount ?? this.likeCount,
       likedByMe: likedByMe ?? this.likedByMe,
       memberUserIds: memberUserIds ?? this.memberUserIds,
+      imageUrls: imageUrls ?? this.imageUrls,
     );
   }
 
@@ -93,6 +97,7 @@ class Plan extends Equatable {
     likeCount,
     likedByMe,
     memberUserIds,
+    imageUrls,
   ];
 
   Plan copyWithField(CreatePlanField field, Object value) {

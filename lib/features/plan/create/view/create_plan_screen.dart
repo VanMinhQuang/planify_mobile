@@ -21,7 +21,9 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
     return BlocConsumer<CreatePlanCubit, CreatePlanState>(
       listener: (context, state) {
         if (state.status.isSuccess && state.createdPlan != null) {
-          context.go(Routes.planDetailPath(state.createdPlan!.id));
+          context.pushReplacement(
+            Routes.planDetailPath(state.createdPlan!.id),
+          );
         }
         if (state.status.isFailure) {
           ScaffoldMessenger.of(

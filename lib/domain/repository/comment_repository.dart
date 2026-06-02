@@ -1,7 +1,12 @@
+import '../models/paged_result.dart';
 import '../models/plan_comment.dart';
 
 abstract interface class CommentRepository {
-  Future<List<PlanComment>> listComments(String planId);
+  Future<PagedResult<PlanComment>> listComments(
+    String planId, {
+    int limit = 20,
+    String? cursor,
+  });
 
   Future<PlanComment> createComment(
     String planId,

@@ -7,6 +7,7 @@ import '../data/impl/auth_repository_impl.dart';
 import '../data/impl/comment_repository_impl.dart';
 import '../data/impl/feed_repository_impl.dart';
 import '../data/impl/friend_repository_impl.dart';
+import '../data/impl/invitation_repository_impl.dart';
 import '../data/impl/like_repository_impl.dart';
 import '../data/impl/notification_repository_impl.dart';
 import '../data/impl/plan_repository_impl.dart';
@@ -18,6 +19,7 @@ import '../domain/repository/auth_repository.dart';
 import '../domain/repository/comment_repository.dart';
 import '../domain/repository/feed_repository.dart';
 import '../domain/repository/friend_repository.dart';
+import '../domain/repository/invitation_repository.dart';
 import '../domain/repository/like_repository.dart';
 import '../domain/repository/notification_repository.dart';
 import '../domain/repository/plan_repository.dart';
@@ -55,6 +57,9 @@ void setupDI(AppConfig config) {
     )
     ..registerLazySingleton<FriendRepository>(
       () => FriendRepositoryImpl(apiClient: getIt<ApiClient>()),
+    )
+    ..registerLazySingleton<InvitationRepository>(
+      () => InvitationRepositoryImpl(apiClient: getIt<ApiClient>()),
     )
     ..registerLazySingleton<ProfileRepository>(
       () => ProfileRepositoryImpl(apiClient: getIt<ApiClient>()),

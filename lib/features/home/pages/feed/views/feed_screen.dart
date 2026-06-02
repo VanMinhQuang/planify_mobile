@@ -3,21 +3,27 @@ import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/router.dart';
+import '../../../../../app/router.dart';
 
 import '../bloc/feed_cubit.dart';
 import '../widgets/feed_card.dart';
 
 class FeedScreen extends StatefulWidget {
-  const FeedScreen({super.key});
+  final ScrollToHideController? scrollToHideController;
+  const FeedScreen({super.key, this.scrollToHideController});
 
   @override
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
 class _FeedScreenState extends State<FeedScreen>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, ListBaseMixin {
   late FeedCubit bloc;
+
+  @override
+  ScrollToHideController? get scrollToHideController =>
+      widget.scrollToHideController;
+
   @override
   void initState() {
     super.initState();
@@ -75,10 +81,24 @@ class _FeedScreenState extends State<FeedScreen>
           return AppSkeleton(
             isLoading: state.isLoading,
             child: ListView.separated(
+              controller: scrollController,
               padding: const EdgeInsets.fromLTRB(0, 12, 0, 96),
-              itemCount: state.posts.length,
+              itemCount: state.posts.length + (state.hasNextPage ? 1 : 0),
               separatorBuilder: (_, _) => const SizedBox(height: 14),
               itemBuilder: (context, index) {
+                if (index >= state.posts.length) {
+                  return Center(
+                    child: TextButton(
+                      onPressed: state.isLoadingMore ? null : bloc.loadMore,
+                      child: state.isLoadingMore
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Load more'),
+                    ),
+                  );
+                }
                 final post = state.posts[index];
                 return FeedCard(post: post);
               },
@@ -90,8 +110,14 @@ class _FeedScreenState extends State<FeedScreen>
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
+
+  @override
+  void onReachBottom() {
+    if (bloc.state.hasNextPage && !bloc.state.isLoadingMore) {
+      bloc.loadMore();
+    }
+  }
 }
 
 class _FeedMessage extends StatelessWidget {

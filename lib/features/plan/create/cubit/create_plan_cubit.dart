@@ -1,17 +1,20 @@
 import 'dart:io';
 
 import 'package:app_core/app_core.dart';
-import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:planify_mobile/domain/enum/create_plan_enum.dart';
 import 'package:planify_mobile/domain/models/plan.dart';
 import 'package:planify_mobile/domain/repository/plan_repository.dart';
+import 'package:planify_mobile/domain/repository/upload_repository.dart';
 
 part 'create_plan_state.dart';
 
 class CreatePlanCubit extends Cubit<CreatePlanState> {
-  CreatePlanCubit({required this.planRepository}) : super(CreatePlanState());
+  CreatePlanCubit({
+    required this.planRepository,
+    required this.uploadRepository,
+  }) : super(CreatePlanState());
   final PlanRepository planRepository;
+  final UploadRepository uploadRepository;
 
   void updateField(CreatePlanField field, Object value) {
     emit(state.copyWith(plan: state.plan.copyWithField(field, value)));
@@ -47,7 +50,25 @@ class CreatePlanCubit extends Cubit<CreatePlanState> {
     emit(state.copyWith(status: CreatePlanStatus.loading));
     try {
       final plan = await planRepository.createPlan(state.plan);
-      emit(state.copyWith(status: CreatePlanStatus.success, createdPlan: plan));
+      final imageFiles = state.journeyImages
+          .where((item) => item.isLocal && item.path.isNotEmpty)
+          .map((item) => File(item.path))
+          .toList();
+      final imageUrls = await uploadRepository.uploadPlanImages(
+        planId: plan.id,
+        files: imageFiles,
+      );
+      emit(
+        state.copyWith(
+          status: CreatePlanStatus.success,
+          createdPlan: plan.copyWith(
+            coverImageUrl: imageUrls.isEmpty
+                ? plan.coverImageUrl
+                : imageUrls.first,
+            imageUrls: imageUrls,
+          ),
+        ),
+      );
     } catch (error) {
       emit(
         state.copyWith(
