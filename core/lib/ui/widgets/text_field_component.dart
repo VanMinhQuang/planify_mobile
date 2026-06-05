@@ -40,8 +40,11 @@ class TextFormFieldComponent extends StatelessWidget {
     this.isLoadingSkeleton = false,
     this.isAutoValidate = false,
     this.minLine,
+    this.labelText,
+    this.textInputAction,
   });
 
+  final String? labelText;
   final int? maxLength;
   final VoidCallback? onTap;
   final bool isDropDown;
@@ -70,6 +73,7 @@ class TextFormFieldComponent extends StatelessWidget {
   final bool isLoadingSkeleton;
   final bool isAutoValidate;
   final int? minLine;
+  final TextInputAction? textInputAction;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +111,7 @@ class TextFormFieldComponent extends StatelessWidget {
                 : (isDropDown || isDateBox)
                 ? onTap
                 : null,
+            //textInputAction: textInputAction,
             readOnly: (isDropDown || isDateBox || isReadOnly),
             minLines: minLine,
             maxLines: maxLine,
@@ -125,6 +130,8 @@ class TextFormFieldComponent extends StatelessWidget {
             decoration: InputDecoration(
               filled: true,
               counterText: '',
+              labelText: labelText,
+              labelStyle: context.normal12(),
               fillColor: isReadOnly ? AppColor.hint.withAlpha(60) : boxColor,
               hintText: placeholder,
               hintStyle: AppTextStyles.normal14(color: AppColor.hint),

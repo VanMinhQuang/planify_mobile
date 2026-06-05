@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:app_core/ui/widgets/container/app_container.dart';
+import 'package:app_core/ui/widgets/circle_app_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/models/app_user.dart';
+import '../../../domain/models/friend_search_result.dart';
 import '../../../domain/models/friendship.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../bloc/friends_cubit.dart';
@@ -15,10 +19,20 @@ class FriendListScreen extends StatefulWidget {
 }
 
 class _FriendListScreenState extends State<FriendListScreen> {
+  final _searchController = TextEditingController();
+  Timer? _searchDebounce;
+
   @override
   void initState() {
     super.initState();
     context.read<FriendsCubit>().load();
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -70,28 +84,86 @@ class _FriendListScreenState extends State<FriendListScreen> {
               )
               .toList();
 
-          if (accepted.isEmpty && incoming.isEmpty && outgoing.isEmpty) {
-            return _FriendMessage(
-              title: 'No friends yet',
-              message: 'Accepted friends and pending requests will show here.',
-              onRetry: context.read<FriendsCubit>().load,
-            );
-          }
-
           return ListView(
             padding: const EdgeInsets.fromLTRB(0, 12, 0, 96),
             children: [
+              _SearchBox(
+                controller: _searchController,
+                isSearching: state.isSearching,
+                onChanged: _onSearchChanged,
+                onClear: () {
+                  _searchController.clear();
+                  context.read<FriendsCubit>().search('');
+                },
+              ),
+              if (state.query.trim().isNotEmpty) ...[
+                _SectionTitle('Find people'),
+                if (state.isSearching)
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (state.searchError.isNotEmpty)
+                  ListTile(
+                    leading: const Icon(Icons.error_outline),
+                    title: const Text('Search failed'),
+                    subtitle: Text(state.searchError),
+                  )
+                else if (state.searchResults.isEmpty)
+                  const ListTile(
+                    leading: Icon(Icons.search_off_outlined),
+                    title: Text('No people found'),
+                  )
+                else
+                  ...state.searchResults.map(
+                    (item) => _SearchResultTile(
+                      result: item,
+                      isBusy:
+                          state.actionIds.contains(item.user.id) ||
+                          state.actionIds.contains(item.friendship?.id),
+                      onAdd: () =>
+                          context.read<FriendsCubit>().addFriend(item.user.id),
+                      onAccept: item.friendship == null
+                          ? null
+                          : () => context.read<FriendsCubit>().accept(
+                              item.friendship!.id,
+                            ),
+                      onRemove: () =>
+                          context.read<FriendsCubit>().remove(item.user.id),
+                    ),
+                  ),
+              ],
+              if (accepted.isEmpty &&
+                  incoming.isEmpty &&
+                  outgoing.isEmpty &&
+                  state.query.trim().isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 24),
+                  child: _FriendMessage(
+                    title: 'No friends yet',
+                    message:
+                        'Search people above or accept pending requests here.',
+                    onRetry: context.read<FriendsCubit>().load,
+                  ),
+                ),
               if (incoming.isNotEmpty) ...[
                 _SectionTitle('Requests'),
                 ...incoming.map(
                   (item) => _FriendTile(
                     friendship: item,
                     currentUserId: currentUserId,
-                    isBusy: state.actionIds.contains(item.id),
+                    isBusy:
+                        state.actionIds.contains(item.id) ||
+                        state.actionIds.contains(
+                          _otherUserId(item, currentUserId),
+                        ),
                     onAccept: () =>
                         context.read<FriendsCubit>().accept(item.id),
                     onReject: () =>
                         context.read<FriendsCubit>().reject(item.id),
+                    onRemove: () => context.read<FriendsCubit>().remove(
+                      _otherUserId(item, currentUserId),
+                    ),
                   ),
                 ),
               ],
@@ -101,7 +173,14 @@ class _FriendListScreenState extends State<FriendListScreen> {
                   (item) => _FriendTile(
                     friendship: item,
                     currentUserId: currentUserId,
-                    isBusy: state.actionIds.contains(item.id),
+                    isBusy:
+                        state.actionIds.contains(item.id) ||
+                        state.actionIds.contains(
+                          _otherUserId(item, currentUserId),
+                        ),
+                    onRemove: () => context.read<FriendsCubit>().remove(
+                      _otherUserId(item, currentUserId),
+                    ),
                   ),
                 ),
               ],
@@ -111,7 +190,14 @@ class _FriendListScreenState extends State<FriendListScreen> {
                   (item) => _FriendTile(
                     friendship: item,
                     currentUserId: currentUserId,
-                    isBusy: state.actionIds.contains(item.id),
+                    isBusy:
+                        state.actionIds.contains(item.id) ||
+                        state.actionIds.contains(
+                          _otherUserId(item, currentUserId),
+                        ),
+                    onRemove: () => context.read<FriendsCubit>().remove(
+                      _otherUserId(item, currentUserId),
+                    ),
                   ),
                 ),
               ],
@@ -120,6 +206,116 @@ class _FriendListScreenState extends State<FriendListScreen> {
         },
       ),
     );
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      context.read<FriendsCubit>().search(value);
+    });
+  }
+
+  String _otherUserId(Friendship friendship, String currentUserId) {
+    return friendship.requesterId == currentUserId
+        ? friendship.addresseeId
+        : friendship.requesterId;
+  }
+}
+
+class _SearchBox extends StatelessWidget {
+  const _SearchBox({
+    required this.controller,
+    required this.isSearching,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  final TextEditingController controller;
+  final bool isSearching;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          hintText: 'Search people',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: controller.text.isEmpty
+              ? isSearching
+                    ? const Padding(
+                        padding: EdgeInsets.all(14),
+                        child: SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : null
+              : IconButton(
+                  tooltip: 'Clear',
+                  onPressed: onClear,
+                  icon: const Icon(Icons.close),
+                ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchResultTile extends StatelessWidget {
+  const _SearchResultTile({
+    required this.result,
+    required this.isBusy,
+    required this.onAdd,
+    required this.onRemove,
+    this.onAccept,
+  });
+
+  final FriendSearchResult result;
+  final bool isBusy;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
+  final VoidCallback? onAccept;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = result.user;
+    return Card(
+      child: ListTile(
+        leading: _UserAvatar(user),
+        title: Text(user.name.isEmpty ? 'Planify user' : user.name),
+        subtitle: Text(_contact(user)),
+        trailing: _searchAction(),
+      ),
+    );
+  }
+
+  Widget _searchAction() {
+    if (isBusy) {
+      return const SizedBox.square(
+        dimension: 18,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+    if (result.isFriend) {
+      return TextButton(onPressed: onRemove, child: const Text('Remove'));
+    }
+    if (result.isIncomingRequest) {
+      return FilledButton(onPressed: onAccept, child: const Text('Accept'));
+    }
+    if (result.isOutgoingRequest) {
+      return TextButton(onPressed: onRemove, child: const Text('Cancel'));
+    }
+    return FilledButton(onPressed: onAdd, child: const Text('Add'));
   }
 }
 
@@ -130,6 +326,7 @@ class _FriendTile extends StatelessWidget {
     required this.isBusy,
     this.onAccept,
     this.onReject,
+    this.onRemove,
   });
 
   final Friendship friendship;
@@ -137,6 +334,7 @@ class _FriendTile extends StatelessWidget {
   final bool isBusy;
   final VoidCallback? onAccept;
   final VoidCallback? onReject;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -147,14 +345,7 @@ class _FriendTile extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: user.avatarUrl?.isNotEmpty == true
-              ? NetworkImage(user.avatarUrl!)
-              : null,
-          child: user.avatarUrl?.isNotEmpty == true
-              ? null
-              : const Icon(Icons.person_outline),
-        ),
+        leading: _UserAvatar(user),
         title: Text(user.name.isEmpty ? 'Planify user' : user.name),
         subtitle: Text(_subtitle(user)),
         trailing: isIncoming
@@ -178,7 +369,20 @@ class _FriendTile extends StatelessWidget {
                   ),
                 ],
               )
-            : _StatusLabel(status: friendship.status),
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _StatusLabel(status: friendship.status),
+                  if (onRemove != null)
+                    IconButton(
+                      tooltip: friendship.status == FriendshipStatus.accepted
+                          ? 'Remove friend'
+                          : 'Cancel request',
+                      onPressed: isBusy ? null : onRemove,
+                      icon: const Icon(Icons.person_remove_outlined),
+                    ),
+                ],
+              ),
       ),
     );
   }
@@ -199,6 +403,21 @@ class _FriendTile extends StatelessWidget {
         ? 'Request sent'
         : 'Wants to be your friend';
   }
+}
+
+class _UserAvatar extends StatelessWidget {
+  const _UserAvatar(this.user);
+
+  final AppUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAppImage(imageUrl: user.avatarUrl, name: user.name);
+  }
+}
+
+String _contact(AppUser user) {
+  return user.email.isNotEmpty ? user.email : user.phone ?? '';
 }
 
 class _StatusLabel extends StatelessWidget {

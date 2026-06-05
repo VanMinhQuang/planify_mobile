@@ -12,6 +12,7 @@ export 'widgets/bottom_loader.dart';
 export 'widgets/card_row_grid.dart';
 export 'widgets/chart/bar_chart.dart';
 export 'widgets/chart/pie_chart.dart';
+export 'widgets/circle_app_image.dart';
 export 'widgets/dialog/dialog.dart';
 export 'widgets/empty_data.dart';
 export 'widgets/container/home_container.dart';

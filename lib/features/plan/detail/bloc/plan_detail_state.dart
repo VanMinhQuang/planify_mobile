@@ -1,12 +1,26 @@
 part of 'plan_detail_cubit.dart';
 
+enum PlanTaskStatus {
+  initial,
+  loading,
+  loadingMore,
+  adding,
+  updating,
+  success,
+  failure,
+}
+
 class PlanDetailState extends Equatable {
   const PlanDetailState({
     this.isLoading = false,
+    this.taskStatus = PlanTaskStatus.initial,
+    this.activeTaskId,
     this.plan,
     this.tasks = const [],
     this.notes = const [],
     this.activity = const [],
+    this.noteFilters = const NoteFilterRequest(),
+    this.activityFilters = const ActivityFilterRequest(),
     this.comments = const [],
     this.friends = const [],
     this.isLiking = false,
@@ -31,10 +45,14 @@ class PlanDetailState extends Equatable {
   });
 
   final bool isLoading;
+  final PlanTaskStatus taskStatus;
+  final String? activeTaskId;
   final Plan? plan;
   final List<PlanTask> tasks;
   final List<PlanNote> notes;
   final List<ActivityEntry> activity;
+  final NoteFilterRequest noteFilters;
+  final ActivityFilterRequest activityFilters;
   final List<PlanComment> comments;
   final List<AppUser> friends;
   final bool isLiking;
@@ -68,10 +86,15 @@ class PlanDetailState extends Equatable {
 
   PlanDetailState copyWith({
     bool? isLoading,
+    PlanTaskStatus? taskStatus,
+    Object? activeTaskId = _unchanged,
     Plan? plan,
+    LatLng? currentLocation,
     List<PlanTask>? tasks,
     List<PlanNote>? notes,
     List<ActivityEntry>? activity,
+    NoteFilterRequest? noteFilters,
+    ActivityFilterRequest? activityFilters,
     List<PlanComment>? comments,
     List<AppUser>? friends,
     bool? isLiking,
@@ -96,10 +119,16 @@ class PlanDetailState extends Equatable {
   }) {
     return PlanDetailState(
       isLoading: isLoading ?? this.isLoading,
+      taskStatus: taskStatus ?? this.taskStatus,
+      activeTaskId: activeTaskId == _unchanged
+          ? this.activeTaskId
+          : activeTaskId as String?,
       plan: plan ?? this.plan,
       tasks: tasks ?? this.tasks,
       notes: notes ?? this.notes,
       activity: activity ?? this.activity,
+      noteFilters: noteFilters ?? this.noteFilters,
+      activityFilters: activityFilters ?? this.activityFilters,
       comments: comments ?? this.comments,
       friends: friends ?? this.friends,
       isLiking: isLiking ?? this.isLiking,
@@ -141,10 +170,14 @@ class PlanDetailState extends Equatable {
   @override
   List<Object?> get props => [
     isLoading,
+    taskStatus,
+    activeTaskId,
     plan,
     tasks,
     notes,
     activity,
+    noteFilters,
+    activityFilters,
     comments,
     friends,
     isLiking,

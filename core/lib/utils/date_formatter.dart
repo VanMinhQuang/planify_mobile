@@ -18,15 +18,6 @@ extension DateFormatter on DateTime {
   }
 
   String toExactUtcIsoString() {
-    return DateTime.utc(
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-    ).toIso8601String();
+    return toUtc().toIso8601String();
   }
 }

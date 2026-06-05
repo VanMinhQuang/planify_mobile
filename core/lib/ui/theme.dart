@@ -39,6 +39,7 @@ class PlanifyTheme {
     return baseTheme.copyWith(
       extensions: [gradients],
       textTheme: textTheme,
+      
       primaryTextTheme: GoogleFonts.beVietnamProTextTheme(
         baseTheme.primaryTextTheme,
       ),

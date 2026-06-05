@@ -1,4 +1,5 @@
 import '../../domain/models/activity_entry.dart';
+import 'app_user_dto.dart';
 
 class ActivityEntryDto {
   const ActivityEntryDto({
@@ -8,6 +9,7 @@ class ActivityEntryDto {
     required this.userId,
     required this.createdAt,
     this.targetTitle,
+    this.user,
   });
 
   final String id;
@@ -16,6 +18,7 @@ class ActivityEntryDto {
   final String userId;
   final String? targetTitle;
   final DateTime createdAt;
+  final AppUserDto? user;
 
   factory ActivityEntryDto.fromJson(Map<String, dynamic> json) {
     return ActivityEntryDto(
@@ -25,6 +28,9 @@ class ActivityEntryDto {
       userId: json['userId'] as String? ?? '',
       targetTitle: json['targetTitle'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      user: json['user'] is Map<String, dynamic>
+          ? AppUserDto.fromJson(json['user'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -36,6 +42,7 @@ class ActivityEntryDto {
       userId: userId,
       createdAt: createdAt,
       targetTitle: targetTitle,
+      user: user?.toDomain(),
     );
   }
 }

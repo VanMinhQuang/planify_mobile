@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:app_core/ui/widgets/container/app_container.dart';
+import 'package:app_core/ui/widgets/circle_app_image.dart';
 import 'package:app_core/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -65,15 +66,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Stack(
                     alignment: Alignment.bottomRight,
                     children: [
-                      CircleAvatar(
+                      CircleAppImage(
                         radius: 48,
-                        backgroundImage:
-                            profileUser?.avatarUrl?.isNotEmpty == true
-                            ? NetworkImage(profileUser!.avatarUrl!)
-                            : null,
-                        child: profileUser?.avatarUrl?.isNotEmpty == true
-                            ? null
-                            : const Icon(Icons.person_outline, size: 40),
+                        imageUrl: profileUser?.avatarUrl,
+                        name: profileUser?.name,
+                        fallbackIcon: Icons.person_outline,
                       ),
                       IconButton.filled(
                         tooltip: 'Change avatar',

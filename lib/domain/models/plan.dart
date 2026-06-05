@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:planify_mobile/domain/enum/create_plan_enum.dart';
+import 'package:planify_mobile/domain/models/app_user.dart';
 
 enum PlanCategory { travel, event, work, personal }
 
@@ -22,6 +23,7 @@ class Plan extends Equatable {
     this.likeCount = 0,
     this.likedByMe = false,
     this.memberUserIds = const [],
+    this.memberUsers = const [],
     this.imageUrls = const [],
   });
 
@@ -40,6 +42,7 @@ class Plan extends Equatable {
   final int likeCount;
   final bool likedByMe;
   final List<String> memberUserIds;
+  final List<AppUser> memberUsers;
   final List<String> imageUrls;
 
   Plan copyWith({
@@ -58,6 +61,7 @@ class Plan extends Equatable {
     int? likeCount,
     bool? likedByMe,
     List<String>? memberUserIds,
+    List<AppUser>? memberUsers,
     List<String>? imageUrls,
   }) {
     return Plan(
@@ -76,6 +80,7 @@ class Plan extends Equatable {
       likeCount: likeCount ?? this.likeCount,
       likedByMe: likedByMe ?? this.likedByMe,
       memberUserIds: memberUserIds ?? this.memberUserIds,
+      memberUsers: memberUsers ?? this.memberUsers,
       imageUrls: imageUrls ?? this.imageUrls,
     );
   }
@@ -97,6 +102,7 @@ class Plan extends Equatable {
     likeCount,
     likedByMe,
     memberUserIds,
+    memberUsers,
     imageUrls,
   ];
 

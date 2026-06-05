@@ -9,6 +9,7 @@ class ApiUrl {
   static const plans = '/plans';
   static const feed = '/feed';
   static const friends = '/friends';
+  static const friendsSearch = '/friends/search';
   static const friendRequests = '/friends/requests';
   static const usersSearch = '/users/search';
   static const invitations = '/invitations';
@@ -28,6 +29,7 @@ class ApiUrl {
   static String planLikes(String planId) => '/plans/$planId/likes';
   static String planActivity(String planId) => '/plans/$planId/activity';
   static String userProfile(String userId) => '/users/$userId/profile';
+  static String friend(String userId) => '/friends/$userId';
   static String acceptFriendRequest(String requestId) =>
       '/friends/requests/$requestId/accept';
   static String rejectFriendRequest(String requestId) =>

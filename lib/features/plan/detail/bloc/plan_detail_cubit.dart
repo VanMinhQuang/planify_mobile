@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:app_core/app_core.dart';
+
 import 'package:planify_mobile/domain/models/models.dart';
 import 'package:planify_mobile/domain/repository/repositories.dart';
 
@@ -26,7 +26,7 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
   final String? _currentUserId;
 
   Future<void> load(String planId) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isLoading: true, taskStatus: PlanTaskStatus.loading));
     try {
       final plan = await _planRepository.getPlan(planId);
       final canViewMemberContent =
@@ -43,6 +43,7 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
             isLoading: false,
             plan: plan,
             tasks: const [],
+            taskStatus: PlanTaskStatus.success,
             notes: const [],
             activity: const [],
             comments: commentsPage.items,
@@ -55,8 +56,8 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
 
       final results = await Future.wait<dynamic>([
         _planRepository.listTasks(planId),
-        _planRepository.listNotes(planId),
-        _planRepository.listActivity(planId),
+        _planRepository.listNotes(planId, filters: state.noteFilters),
+        _planRepository.listActivity(planId, filters: state.activityFilters),
         commentsFuture,
         friendsFuture,
       ]);
@@ -70,6 +71,7 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
           isLoading: false,
           plan: plan,
           tasks: tasksPage.items,
+          taskStatus: PlanTaskStatus.success,
           tasksNextCursor: tasksPage.nextCursor,
           tasksHasNextPage: tasksPage.hasNextPage,
           notes: notesPage.items,
@@ -85,7 +87,13 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
         ),
       );
     } catch (error) {
-      emit(state.copyWith(isLoading: false, message: error.toString()));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          taskStatus: PlanTaskStatus.failure,
+          message: error.toString(),
+        ),
+      );
     }
   }
 
@@ -141,7 +149,12 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
     if (plan == null || !state.tasksHasNextPage || state.isLoadingMoreTasks) {
       return;
     }
-    emit(state.copyWith(isLoadingMoreTasks: true));
+    emit(
+      state.copyWith(
+        isLoadingMoreTasks: true,
+        taskStatus: PlanTaskStatus.loadingMore,
+      ),
+    );
     try {
       final page = await _planRepository.listTasks(
         plan.id,
@@ -153,11 +166,16 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
           tasksNextCursor: page.nextCursor,
           tasksHasNextPage: page.hasNextPage,
           isLoadingMoreTasks: false,
+          taskStatus: PlanTaskStatus.success,
         ),
       );
     } catch (error) {
       emit(
-        state.copyWith(isLoadingMoreTasks: false, message: error.toString()),
+        state.copyWith(
+          isLoadingMoreTasks: false,
+          taskStatus: PlanTaskStatus.failure,
+          message: error.toString(),
+        ),
       );
     }
   }
@@ -171,6 +189,7 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
     try {
       final page = await _planRepository.listNotes(
         plan.id,
+        filters: state.noteFilters,
         cursor: state.notesNextCursor,
       );
       emit(
@@ -199,6 +218,7 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
     try {
       final page = await _planRepository.listActivity(
         plan.id,
+        filters: state.activityFilters,
         cursor: state.activityNextCursor,
       );
       emit(
@@ -261,8 +281,10 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
     try {
       final comment = await _commentRepository.createComment(
         plan.id,
-        content.trim(),
-        parentCommentId: parentCommentId,
+        CreateCommentRequest(
+          content: content.trim(),
+          parentCommentId: parentCommentId,
+        ),
       );
       final comments = parentCommentId == null
           ? [...state.comments, comment]
@@ -340,52 +362,170 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
     }).toList();
   }
 
-  Future<void> addTask(
-    String title, {
-    String? description,
-    String? locationName,
-    double? locationLat,
-    double? locationLng,
-    DateTime? dueDate,
-  }) async {
+  Future<void> addTask(CreateTaskRequest request) async {
     final plan = state.plan;
-    if (plan == null || title.trim().isEmpty) {
+    if (plan == null ||
+        request.title.trim().isEmpty ||
+        state.taskStatus == PlanTaskStatus.adding) {
       return;
     }
-    final task = await _planRepository.createTask(
-      plan.id,
-      title.trim(),
-      description: description,
-      locationName: locationName,
-      locationLat: locationLat,
-      locationLng: locationLng,
-      dueDate: dueDate,
-    );
-    emit(state.copyWith(tasks: [task, ...state.tasks]));
+
+    emit(state.copyWith(taskStatus: PlanTaskStatus.adding, activeTaskId: null));
+    try {
+      final task = await _planRepository.createTask(plan.id, request);
+      emit(
+        state.copyWith(
+          tasks: [task, ...state.tasks],
+          taskStatus: PlanTaskStatus.success,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          taskStatus: PlanTaskStatus.failure,
+          message: error.toString(),
+        ),
+      );
+    }
   }
 
   Future<void> toggleTask(PlanTask task) async {
-    final updated = await _planRepository.updateTaskDone(
-      task.planId,
-      task.id,
-      !task.isDone,
-    );
-    emit(
-      state.copyWith(
-        tasks: state.tasks
-            .map((item) => item.id == updated.id ? updated : item)
-            .toList(),
-      ),
-    );
+    await updateTask(task, UpdateTaskRequest(isDone: !task.isDone));
   }
 
-  Future<void> addNote(String content) async {
-    final plan = state.plan;
-    if (plan == null || content.trim().isEmpty) {
+  Future<void> updateTask(PlanTask task, UpdateTaskRequest request) async {
+    if (state.taskStatus == PlanTaskStatus.updating &&
+        state.activeTaskId == task.id) {
       return;
     }
-    final note = await _planRepository.createNote(plan.id, content.trim());
-    emit(state.copyWith(notes: [note, ...state.notes]));
+
+    emit(
+      state.copyWith(
+        taskStatus: PlanTaskStatus.updating,
+        activeTaskId: task.id,
+      ),
+    );
+    try {
+      final updated = await _planRepository.updateTask(
+        task.planId,
+        task.id,
+        request,
+      );
+      emit(
+        state.copyWith(
+          tasks: state.tasks
+              .map((item) => item.id == updated.id ? updated : item)
+              .toList(),
+          taskStatus: PlanTaskStatus.success,
+          activeTaskId: null,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          taskStatus: PlanTaskStatus.failure,
+          activeTaskId: null,
+          message: error.toString(),
+        ),
+      );
+    }
+  }
+
+  Future<void> reloadNotes({NoteFilterRequest? filters}) async {
+    final plan = state.plan;
+    if (plan == null || state.isLoadingMoreNotes) {
+      return;
+    }
+    final nextFilters = filters ?? state.noteFilters;
+    emit(
+      state.copyWith(
+        isLoadingMoreNotes: true,
+        noteFilters: nextFilters,
+        notesNextCursor: null,
+        notesHasNextPage: false,
+      ),
+    );
+    try {
+      final page = await _planRepository.listNotes(
+        plan.id,
+        filters: nextFilters,
+      );
+      emit(
+        state.copyWith(
+          notes: page.items,
+          notesNextCursor: page.nextCursor,
+          notesHasNextPage: page.hasNextPage,
+          isLoadingMoreNotes: false,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(isLoadingMoreNotes: false, message: error.toString()),
+      );
+    }
+  }
+
+  Future<void> updateNoteFilters(NoteFilterRequest filters) {
+    return reloadNotes(filters: filters);
+  }
+
+  Future<void> clearNoteFilters() {
+    return reloadNotes(filters: const NoteFilterRequest());
+  }
+
+  Future<void> reloadActivity({ActivityFilterRequest? filters}) async {
+    final plan = state.plan;
+    if (plan == null || state.isLoadingMoreActivity) {
+      return;
+    }
+    final nextFilters = filters ?? state.activityFilters;
+    emit(
+      state.copyWith(
+        isLoadingMoreActivity: true,
+        activityFilters: nextFilters,
+        activityNextCursor: null,
+        activityHasNextPage: false,
+      ),
+    );
+    try {
+      final page = await _planRepository.listActivity(
+        plan.id,
+        filters: nextFilters,
+      );
+      emit(
+        state.copyWith(
+          activity: page.items,
+          activityNextCursor: page.nextCursor,
+          activityHasNextPage: page.hasNextPage,
+          isLoadingMoreActivity: false,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(isLoadingMoreActivity: false, message: error.toString()),
+      );
+    }
+  }
+
+  Future<void> updateActivityFilters(ActivityFilterRequest filters) {
+    return reloadActivity(filters: filters);
+  }
+
+  Future<void> clearActivityFilters() {
+    return reloadActivity(filters: const ActivityFilterRequest());
+  }
+
+  Future<void> addNote(CreateNoteRequest request) async {
+    final plan = state.plan;
+    if (plan == null || request.content.trim().isEmpty) {
+      return;
+    }
+    try {
+      final note = await _planRepository.createNote(plan.id, request);
+      emit(state.copyWith(notes: [note, ...state.notes]));
+    } catch (error) {
+      emit(state.copyWith(message: error.toString()));
+    }
   }
 
   Future<void> createInvite({String? inviteeId}) async {
@@ -397,7 +537,7 @@ class PlanDetailCubit extends Cubit<PlanDetailState> {
     try {
       final invite = await _planRepository.createInvite(
         plan.id,
-        inviteeId: inviteeId,
+        CreateInviteRequest(inviteeId: inviteeId),
       );
       final inviteUrl = invite['url'] as String?;
       emit(

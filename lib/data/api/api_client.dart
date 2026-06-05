@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:app_core/app_core.dart';
@@ -36,6 +37,7 @@ class ApiClient {
     Duration timeout = const Duration(minutes: 1),
   }) async {
     try {
+      print(jsonEncode(body));
       final res = await _service.post(path, data: body).timeout(timeout);
 
       if (extractMessage) {

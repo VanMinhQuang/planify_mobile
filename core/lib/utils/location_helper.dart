@@ -4,11 +4,11 @@ import 'package:app_core/app_core.dart';
 
 class LocationHelper {
   /// Get current device location
-  static Future<LatLng> getCurrentLocation() async {
+  static Future<LatLng?> getCurrentLocation() async {
     // 1. Check if location service is enabled
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw Exception('Location services are disabled.');
+      return null;
     }
 
     // 2. Check permission
@@ -17,12 +17,12 @@ class LocationHelper {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw Exception('Location permission denied');
+        return null;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw Exception('Location permission permanently denied');
+      return null;
     }
 
     // 3. Get position

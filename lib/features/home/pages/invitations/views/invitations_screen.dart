@@ -143,15 +143,10 @@ class _InvitationCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
+                      CircleAppImage(
                         radius: 18,
-                        backgroundImage:
-                            invitation.creator?.avatarUrl?.isNotEmpty == true
-                            ? NetworkImage(invitation.creator!.avatarUrl!)
-                            : null,
-                        child: invitation.creator?.avatarUrl?.isNotEmpty == true
-                            ? null
-                            : const Icon(Icons.person_outline),
+                        imageUrl: invitation.creator?.avatarUrl,
+                        name: invitation.creator?.name,
                       ),
                       const SizedBox(width: 10),
                       Expanded(

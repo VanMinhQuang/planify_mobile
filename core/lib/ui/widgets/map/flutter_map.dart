@@ -122,21 +122,15 @@ class _AppMapState extends State<AppMap> with TickerProviderStateMixin {
     super.initState();
     _appMapController._raw = widget.controller ?? MapController();
     _appMapController._ticker = this;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onMapReady?.call(_appMapController);
+    });
   }
 
   @override
   void dispose() {
     if (widget.controller == null) _appMapController._raw.dispose();
     super.dispose();
-  }
-
-  // Expose to parent via onMapReady
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.onMapReady?.call(_appMapController);
-    });
   }
 
   LatLng get _center =>
@@ -173,8 +167,8 @@ class _AppMapState extends State<AppMap> with TickerProviderStateMixin {
           children: [
             // ── Tile layer ──────────────────────────────────
             TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'gov.thaison.cmps',
+              urlTemplate: widget.tileUrlTemplate,
+              userAgentPackageName: widget.userAgentPackageName,
               tileProvider: NetworkTileProvider(
                 cachingProvider: BuiltInMapCachingProvider.getOrCreateInstance(
                   maxCacheSize: 1_000_000_000,
@@ -288,9 +282,7 @@ class _AppMapState extends State<AppMap> with TickerProviderStateMixin {
       point: model.latLng,
       width: model.width,
       height: model.height,
-      alignment: model.type == MarkerType.pin
-          ? Alignment.bottomCenter
-          : Alignment.topCenter,
+      alignment: model.type == MarkerType.pin ? null : Alignment.topCenter,
       child: child,
     );
   }

@@ -4,6 +4,8 @@ import 'package:planify_mobile/domain/models/plan.dart';
 import 'package:planify_mobile/domain/models/plan_task.dart';
 import 'package:planify_mobile/features/plan/detail/bloc/plan_detail_cubit.dart';
 import 'package:planify_mobile/features/plan/detail/widgets/load_more_tile.dart';
+import 'package:planify_mobile/features/plan/detail/widgets/modal/create_task_modal.dart';
+import 'package:planify_mobile/features/plan/detail/widgets/modal/task_detail_modal.dart';
 
 class TasksTab extends StatefulWidget {
   const TasksTab({super.key});
@@ -98,6 +100,9 @@ class _TasksTabState extends State<TasksTab> {
                               task: tasks[index],
                               isFirst: index == 0,
                               isLast: index == tasks.length - 1,
+                              isUpdating:
+                                  state.taskStatus == PlanTaskStatus.updating &&
+                                  state.activeTaskId == tasks[index].id,
                               onTap: () =>
                                   _showTaskDetailSheet(context, tasks[index]),
                             );
@@ -175,18 +180,23 @@ class _TasksTabState extends State<TasksTab> {
     BuildContext context,
     DateTime selectedDay,
   ) {
-    return showModalBottomSheet<void>(
+    return SheetUtils.openCustomBottomSheet(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => _CreateTaskSheet(selectedDay: selectedDay),
+      builder: (_) => BlocProvider.value(
+        value: context.read<PlanDetailCubit>(),
+        child: CreateTaskSheet(selectedDay: selectedDay),
+      ),
     );
   }
 
   Future<void> _showTaskDetailSheet(BuildContext context, PlanTask task) {
-    return showModalBottomSheet<void>(
+    return SheetUtils.openCustomBottomSheet(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => _TaskDetailSheet(task: task),
+      height: 0.92,
+      builder: (_) => BlocProvider.value(
+        value: context.read<PlanDetailCubit>(),
+        child: TaskDetailSheet(task: task),
+      ),
     );
   }
 }
@@ -208,7 +218,7 @@ class _TimelineHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -234,23 +244,73 @@ class _TimelineHeader extends StatelessWidget {
                 ],
               ),
             ),
-            IconButton.filled(
-              tooltip: 'Add itinerary item',
-              onPressed: onAdd,
-              icon: const Icon(Icons.add),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: DecoratedBox(
+                decoration: BoxDecoration(gradient: context.gradients.primary),
+                child: IconButton.filled(
+                  tooltip: 'Add itinerary item',
+                  onPressed: onAdd,
+                  style: ButtonStyle(
+                    backgroundColor: const WidgetStatePropertyAll(
+                      Colors.transparent,
+                    ),
+                    foregroundColor: WidgetStatePropertyAll(
+                      colorScheme.onPrimary,
+                    ),
+                    overlayColor: WidgetStatePropertyAll(
+                      colorScheme.onPrimary.withValues(alpha: .12),
+                    ),
+                  ),
+                  icon: const Icon(LucideIcons.plus600, color: Colors.white),
+                ),
+              ),
             ),
           ],
         ),
         const SizedBox(height: 14),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: LinearProgressIndicator(
-            minHeight: 8,
-            value: progress,
-            backgroundColor: colorScheme.surfaceContainerHighest,
-          ),
-        ),
+        _GradientProgressBar(progress: progress),
       ],
+    );
+  }
+}
+
+class _GradientProgressBar extends StatelessWidget {
+  const _GradientProgressBar({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colors;
+    final value = progress.clamp(0.0, 1.0).toDouble();
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: SizedBox(
+        height: 8,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ColoredBox(color: colorScheme.surfaceContainerHighest),
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(end: value),
+              duration: const Duration(milliseconds: 360),
+              curve: Curves.easeOutCubic,
+              builder: (context, animatedValue, child) {
+                return FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: animatedValue,
+                  child: child,
+                );
+              },
+              child: DecoratedBox(
+                decoration: BoxDecoration(gradient: context.gradients.primary),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -331,12 +391,14 @@ class _TimelineTaskTile extends StatelessWidget {
     required this.task,
     required this.isFirst,
     required this.isLast,
+    required this.isUpdating,
     required this.onTap,
   });
 
   final PlanTask task;
   final bool isFirst;
   final bool isLast;
+  final bool isUpdating;
   final VoidCallback onTap;
 
   @override
@@ -419,8 +481,11 @@ class _TimelineTaskTile extends StatelessWidget {
                       children: [
                         Checkbox(
                           value: task.isDone,
-                          onChanged: (_) =>
-                              context.read<PlanDetailCubit>().toggleTask(task),
+                          onChanged: isUpdating
+                              ? null
+                              : (_) => context
+                                    .read<PlanDetailCubit>()
+                                    .toggleTask(task),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -437,7 +502,7 @@ class _TimelineTaskTile extends StatelessWidget {
                                           : null,
                                     ),
                               ),
-                              if (_hasText(task.description)) ...[
+                              if (task.hasText(task.description)) ...[
                                 const SizedBox(height: 6),
                                 Text(
                                   task.description!.trim(),
@@ -449,7 +514,7 @@ class _TimelineTaskTile extends StatelessWidget {
                                       ),
                                 ),
                               ],
-                              if (_hasLocation(task)) ...[
+                              if (task.hasText(task.locationName)) ...[
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
@@ -461,7 +526,7 @@ class _TimelineTaskTile extends StatelessWidget {
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
-                                        _locationLabel(task),
+                                        task.locationName ?? '',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: Theme.of(context)
@@ -489,342 +554,4 @@ class _TimelineTaskTile extends StatelessWidget {
       ),
     );
   }
-}
-
-class _CreateTaskSheet extends StatefulWidget {
-  const _CreateTaskSheet({required this.selectedDay});
-
-  final DateTime selectedDay;
-
-  @override
-  State<_CreateTaskSheet> createState() => _CreateTaskSheetState();
-}
-
-class _CreateTaskSheetState extends State<_CreateTaskSheet> {
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _locationNameController = TextEditingController();
-  final _locationLatController = TextEditingController();
-  final _locationLngController = TextEditingController();
-  var _time = const TimeOfDay(hour: 8, minute: 0);
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _locationNameController.dispose();
-    _locationLatController.dispose();
-    _locationLngController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-    final colorScheme = Theme.of(context).colorScheme;
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20, 18, 20, bottomInset + 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Add itinerary item',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Close',
-                  onPressed: Navigator.of(context).pop,
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _titleController,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Task',
-                hintText: 'Visit museum, dinner reservation...',
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _descriptionController,
-              minLines: 2,
-              maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'Tickets, notes, what to see...',
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _locationNameController,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Location name',
-                hintText: 'Restaurant, landmark, hotel...',
-                prefixIcon: Icon(Icons.place_outlined),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _locationLatController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                      signed: true,
-                    ),
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Latitude'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: _locationLngController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                      signed: true,
-                    ),
-                    textInputAction: TextInputAction.done,
-                    decoration: const InputDecoration(labelText: 'Longitude'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: colorScheme.outlineVariant),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.calendar_today_outlined, size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            DateFormat(
-                              'MMM d, yyyy',
-                            ).format(widget.selectedDay),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                OutlinedButton.icon(
-                  onPressed: _pickTime,
-                  icon: const Icon(Icons.schedule),
-                  label: Text(_time.format(context)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            FilledButton.icon(
-              onPressed: _titleController.text.trim().isEmpty ? null : _save,
-              icon: const Icon(Icons.add),
-              label: const Text('Add to day'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _pickTime() async {
-    final picked = await showTimePicker(context: context, initialTime: _time);
-    if (picked != null) {
-      setState(() => _time = picked);
-    }
-  }
-
-  Future<void> _save() async {
-    final dueDate = DateTime(
-      widget.selectedDay.year,
-      widget.selectedDay.month,
-      widget.selectedDay.day,
-      _time.hour,
-      _time.minute,
-    );
-    await context.read<PlanDetailCubit>().addTask(
-      _titleController.text,
-      description: _descriptionController.text,
-      locationName: _locationNameController.text,
-      locationLat: double.tryParse(_locationLatController.text.trim()),
-      locationLng: double.tryParse(_locationLngController.text.trim()),
-      dueDate: dueDate,
-    );
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
-  }
-}
-
-class _TaskDetailSheet extends StatelessWidget {
-  const _TaskDetailSheet({required this.task});
-
-  final PlanTask task;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final dueDate = task.dueDate?.toLocal();
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    task.title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Close',
-                  onPressed: Navigator.of(context).pop,
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _DetailChip(
-                  icon: Icons.schedule,
-                  label: dueDate == null
-                      ? 'Anytime'
-                      : DateFormat('MMM d, h:mm a').format(dueDate),
-                ),
-                _DetailChip(
-                  icon: task.isDone
-                      ? Icons.check_circle_outline
-                      : Icons.radio_button_unchecked,
-                  label: task.isDone ? 'Completed' : 'Planned',
-                ),
-              ],
-            ),
-            if (_hasLocation(task)) ...[
-              const SizedBox(height: 18),
-              Text(
-                'Location',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.place_outlined, color: colorScheme.primary),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(_locationLabel(task))),
-                ],
-              ),
-            ],
-            if (_hasText(task.description)) ...[
-              const SizedBox(height: 18),
-              Text(
-                'Description',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(task.description!.trim()),
-            ],
-            const SizedBox(height: 22),
-            FilledButton.icon(
-              onPressed: () {
-                context.read<PlanDetailCubit>().toggleTask(task);
-                Navigator.of(context).pop();
-              },
-              icon: Icon(task.isDone ? Icons.undo : Icons.check),
-              label: Text(task.isDone ? 'Mark planned' : 'Mark complete'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DetailChip extends StatelessWidget {
-  const _DetailChip({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: colorScheme.primary),
-          const SizedBox(width: 6),
-          Text(label),
-        ],
-      ),
-    );
-  }
-}
-
-bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
-
-bool _hasLocation(PlanTask task) {
-  return _hasText(task.locationName) ||
-      task.locationLat != null ||
-      task.locationLng != null;
-}
-
-String _locationLabel(PlanTask task) {
-  final parts = <String>[
-    if (_hasText(task.locationName)) task.locationName!.trim(),
-    if (task.locationLat != null || task.locationLng != null)
-      [
-        if (task.locationLat != null)
-          'lat ${task.locationLat!.toStringAsFixed(5)}',
-        if (task.locationLng != null)
-          'lng ${task.locationLng!.toStringAsFixed(5)}',
-      ].join(', '),
-  ];
-  return parts.join(' - ');
 }

@@ -3,6 +3,7 @@ import '../models/paged_result.dart';
 import '../models/plan.dart';
 import '../models/plan_note.dart';
 import '../models/plan_task.dart';
+import '../models/requests/requests.dart';
 
 abstract interface class PlanRepository {
   Future<PagedResult<Plan>> listPlans({
@@ -21,31 +22,32 @@ abstract interface class PlanRepository {
     String? cursor,
   });
 
-  Future<PlanTask> createTask(
-    String planId,
-    String title, {
-    String? description,
-    String? locationName,
-    double? locationLat,
-    double? locationLng,
-    DateTime? dueDate,
-  });
+  Future<PlanTask> createTask(String planId, CreateTaskRequest request);
 
-  Future<PlanTask> updateTaskDone(String planId, String taskId, bool isDone);
+  Future<PlanTask> updateTask(
+    String planId,
+    String taskId,
+    UpdateTaskRequest request,
+  );
 
   Future<PagedResult<PlanNote>> listNotes(
     String planId, {
+    NoteFilterRequest filters = const NoteFilterRequest(),
     int limit = 20,
     String? cursor,
   });
 
-  Future<PlanNote> createNote(String planId, String content);
+  Future<PlanNote> createNote(String planId, CreateNoteRequest request);
 
   Future<PagedResult<ActivityEntry>> listActivity(
     String planId, {
+    ActivityFilterRequest filters = const ActivityFilterRequest(),
     int limit = 20,
     String? cursor,
   });
 
-  Future<Map<String, dynamic>> createInvite(String planId, {String? inviteeId});
+  Future<Map<String, dynamic>> createInvite(
+    String planId,
+    CreateInviteRequest request,
+  );
 }

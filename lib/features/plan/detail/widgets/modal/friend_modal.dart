@@ -96,14 +96,7 @@ class _InviteFriendTile extends StatelessWidget {
     final title = friend.name.isEmpty ? 'Planify user' : friend.name;
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        backgroundImage: avatarUrl?.isNotEmpty == true
-            ? NetworkImage(avatarUrl!)
-            : null,
-        child: avatarUrl?.isNotEmpty == true
-            ? null
-            : const Icon(Icons.person_outline),
-      ),
+      leading: CircleAppImage(imageUrl: avatarUrl, name: title),
       title: Text(title),
       subtitle: friend.email.isEmpty ? null : Text(friend.email),
       trailing: const Icon(Icons.chevron_right),

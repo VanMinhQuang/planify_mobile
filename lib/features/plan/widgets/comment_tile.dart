@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_core/app_core.dart';
 import 'package:planify_mobile/domain/models/plan_comment.dart';
 
 class CommentTile extends StatelessWidget {
@@ -23,13 +24,9 @@ class CommentTile extends StatelessWidget {
         children: [
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: CircleAvatar(
-              backgroundImage: comment.user?.avatarUrl?.isNotEmpty == true
-                  ? NetworkImage(comment.user!.avatarUrl!)
-                  : null,
-              child: comment.user?.avatarUrl?.isNotEmpty == true
-                  ? null
-                  : const Icon(Icons.person_outline),
+            leading: CircleAppImage(
+              imageUrl: comment.user?.avatarUrl,
+              name: comment.user?.name,
             ),
             title: Text(comment.user?.name ?? 'Planify user'),
             subtitle: Column(

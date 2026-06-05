@@ -1,7 +1,9 @@
 import '../../domain/models/friendship.dart';
+import '../../domain/models/friend_search_result.dart';
 import '../../domain/repository/friend_repository.dart';
 import '../api/api_client.dart';
 import '../constants/api_url.dart';
+import '../dto/friend_search_result_dto.dart';
 import '../dto/friendship_dto.dart';
 
 class FriendRepositoryImpl implements FriendRepository {
@@ -15,6 +17,25 @@ class FriendRepositoryImpl implements FriendRepository {
       path: ApiUrl.friends,
       parser: (json) => (json as List<dynamic>)
           .map((item) => FriendshipDto.fromJson(item as Map<String, dynamic>))
+          .map((item) => item.toDomain())
+          .toList(),
+    );
+    return result ?? [];
+  }
+
+  @override
+  Future<List<FriendSearchResult>> searchFriends(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return [];
+
+    final result = await _apiClient.get(
+      path: ApiUrl.friendsSearch,
+      queryParameters: {'q': trimmed},
+      parser: (json) => (json as List<dynamic>)
+          .map(
+            (item) =>
+                FriendSearchResultDto.fromJson(item as Map<String, dynamic>),
+          )
           .map((item) => item.toDomain())
           .toList(),
     );
@@ -56,5 +77,10 @@ class FriendRepositoryImpl implements FriendRepository {
       body: {},
       parser: (_) => null,
     );
+  }
+
+  @override
+  Future<void> removeFriend(String userId) async {
+    await _apiClient.delete(path: ApiUrl.friend(userId));
   }
 }

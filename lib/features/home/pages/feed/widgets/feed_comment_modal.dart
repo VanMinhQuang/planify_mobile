@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:planify_mobile/domain/models/feed_post.dart';
 import 'package:planify_mobile/domain/models/paged_result.dart';
 import 'package:planify_mobile/domain/models/plan_comment.dart';
+import 'package:planify_mobile/domain/models/requests/create_comment_request.dart';
 import 'package:planify_mobile/domain/repository/comment_repository.dart';
 import 'package:planify_mobile/features/home/pages/feed/bloc/feed_cubit.dart';
 
@@ -220,8 +221,10 @@ class _CommentsSheetState extends State<CommentsSheet> {
     try {
       final comment = await context.read<CommentRepository>().createComment(
         widget.post.plan.id,
-        content,
-        parentCommentId: _replyingTo?.id,
+        CreateCommentRequest(
+          content: content,
+          parentCommentId: _replyingTo?.id,
+        ),
       );
       if (!mounted) {
         return;
@@ -347,17 +350,11 @@ class _SheetCommentTile extends StatelessWidget {
       child: Column(
         children: [
           ListTile(
-            leading: CircleAvatar(
+            leading: CircleAppImage(
+              imageUrl: comment.user?.avatarUrl,
+              name: comment.user?.name,
               backgroundColor: colors.primaryContainer,
-              backgroundImage: comment.user?.avatarUrl?.isNotEmpty == true
-                  ? NetworkImage(comment.user!.avatarUrl!)
-                  : null,
-              child: comment.user?.avatarUrl?.isNotEmpty == true
-                  ? null
-                  : Icon(
-                      Icons.person_outline,
-                      color: colors.onPrimaryContainer,
-                    ),
+              foregroundColor: colors.onPrimaryContainer,
             ),
             title: Text(
               comment.user?.name ?? 'Planify user',

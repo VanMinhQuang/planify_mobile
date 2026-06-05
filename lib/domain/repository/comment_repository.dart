@@ -1,5 +1,6 @@
 import '../models/paged_result.dart';
 import '../models/plan_comment.dart';
+import '../models/requests/create_comment_request.dart';
 
 abstract interface class CommentRepository {
   Future<PagedResult<PlanComment>> listComments(
@@ -10,9 +11,8 @@ abstract interface class CommentRepository {
 
   Future<PlanComment> createComment(
     String planId,
-    String content, {
-    String? parentCommentId,
-  });
+    CreateCommentRequest request,
+  );
 
   Future<void> deleteComment(String planId, String commentId);
 

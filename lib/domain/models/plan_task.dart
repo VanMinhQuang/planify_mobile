@@ -38,4 +38,10 @@ class PlanTask extends Equatable {
     assignedTo,
     dueDate,
   ];
+
+  bool hasText(String? value) => value != null && value.trim().isNotEmpty;
+
+  bool hasLocation() {
+    return hasText(locationName) || locationLat != null || locationLng != null;
+  }
 }

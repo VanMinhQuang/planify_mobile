@@ -28,13 +28,9 @@ class FeedCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ListTile(
-              leading: CircleAvatar(
-                backgroundImage: post.owner?.avatarUrl?.isNotEmpty == true
-                    ? NetworkImage(post.owner!.avatarUrl!)
-                    : null,
-                child: post.owner?.avatarUrl?.isNotEmpty == true
-                    ? null
-                    : const Icon(Icons.person_outline),
+              leading: CircleAppImage(
+                imageUrl: post.owner?.avatarUrl,
+                name: post.owner?.name,
               ),
               title: Text(post.owner?.name ?? 'Planify user'),
               subtitle: Text(dateText),

@@ -92,7 +92,6 @@ class _AvatarNavIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasAvatar = avatarUrl != null && avatarUrl!.isNotEmpty;
     return Container(
       padding: EdgeInsets.all(isSelected ? 2 : 0),
       decoration: BoxDecoration(
@@ -101,11 +100,7 @@ class _AvatarNavIcon extends StatelessWidget {
             ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
             : null,
       ),
-      child: CircleAvatar(
-        radius: 12,
-        backgroundImage: hasAvatar ? NetworkImage(avatarUrl!) : null,
-        child: hasAvatar ? null : const Icon(Icons.person_outline, size: 18),
-      ),
+      child: CircleAppImage(radius: 12, imageUrl: avatarUrl),
     );
   }
 }

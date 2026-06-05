@@ -1,4 +1,5 @@
 import 'package:planify_mobile/data/dto/member_dto.dart';
+import 'package:planify_mobile/domain/models/app_user.dart';
 
 import '../../domain/models/plan.dart';
 
@@ -108,6 +109,10 @@ class PlanDto {
       memberUserIds: members
           .map((member) => member.userId)
           .whereType<String>()
+          .toList(),
+      memberUsers: members
+          .map((member) => member.user?.toDomain())
+          .whereType<AppUser>()
           .toList(),
     );
   }

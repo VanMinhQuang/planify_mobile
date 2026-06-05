@@ -3,6 +3,7 @@ import '../../domain/models/paged_result.dart';
 import '../../domain/models/plan.dart';
 import '../../domain/models/plan_note.dart';
 import '../../domain/models/plan_task.dart';
+import '../../domain/models/requests/requests.dart';
 import '../../domain/repository/plan_repository.dart';
 import '../api/api_client.dart';
 import '../constants/api_url.dart';
@@ -112,30 +113,11 @@ class PlanRepositoryImpl implements PlanRepository {
   }
 
   @override
-  Future<PlanTask> createTask(
-    String planId,
-    String title, {
-    String? description,
-    String? locationName,
-    double? locationLat,
-    double? locationLng,
-    DateTime? dueDate,
-  }) async {
+  Future<PlanTask> createTask(String planId, CreateTaskRequest request) async {
     try {
       final result = await _apiClient.post(
         path: ApiUrl.planTasks(planId),
-        body: {
-          'title': title,
-          ...?(_blankToNull(description) == null
-              ? null
-              : {'description': description!.trim()}),
-          ...?(_blankToNull(locationName) == null
-              ? null
-              : {'locationName': locationName!.trim()}),
-          ...?(locationLat == null ? null : {'locationLat': locationLat}),
-          ...?(locationLng == null ? null : {'locationLng': locationLng}),
-          ...?(dueDate == null ? null : {'dueDate': dueDate.toIso8601String()}),
-        },
+        body: request.toJson(),
         parser: (json) =>
             PlanTaskDto.fromJson(json as Map<String, dynamic>).toDomain(),
       );
@@ -149,21 +131,16 @@ class PlanRepositoryImpl implements PlanRepository {
     }
   }
 
-  String? _blankToNull(String? value) {
-    final trimmed = value?.trim();
-    return trimmed == null || trimmed.isEmpty ? null : trimmed;
-  }
-
   @override
-  Future<PlanTask> updateTaskDone(
+  Future<PlanTask> updateTask(
     String planId,
     String taskId,
-    bool isDone,
+    UpdateTaskRequest request,
   ) async {
     try {
       final result = await _apiClient.patch(
         path: ApiUrl.planTask(planId, taskId),
-        body: {'isDone': isDone},
+        body: request.toJson(),
         parser: (json) =>
             PlanTaskDto.fromJson(json as Map<String, dynamic>).toDomain(),
       );
@@ -180,6 +157,7 @@ class PlanRepositoryImpl implements PlanRepository {
   @override
   Future<PagedResult<PlanNote>> listNotes(
     String planId, {
+    NoteFilterRequest filters = const NoteFilterRequest(),
     int limit = 20,
     String? cursor,
   }) async {
@@ -188,6 +166,7 @@ class PlanRepositoryImpl implements PlanRepository {
         path: ApiUrl.planNotes(planId),
         queryParameters: {
           'limit': limit,
+          ...filters.toQueryParameters(),
           ...?(cursor == null ? null : {'cursor': cursor}),
         },
         parser: (json) =>
@@ -206,11 +185,11 @@ class PlanRepositoryImpl implements PlanRepository {
   }
 
   @override
-  Future<PlanNote> createNote(String planId, String content) async {
+  Future<PlanNote> createNote(String planId, CreateNoteRequest request) async {
     try {
       final result = await _apiClient.post(
         path: ApiUrl.planNotes(planId),
-        body: {'content': content},
+        body: request.toJson(),
         parser: (json) =>
             PlanNoteDto.fromJson(json as Map<String, dynamic>).toDomain(),
       );
@@ -227,6 +206,7 @@ class PlanRepositoryImpl implements PlanRepository {
   @override
   Future<PagedResult<ActivityEntry>> listActivity(
     String planId, {
+    ActivityFilterRequest filters = const ActivityFilterRequest(),
     int limit = 20,
     String? cursor,
   }) async {
@@ -235,6 +215,7 @@ class PlanRepositoryImpl implements PlanRepository {
         path: ApiUrl.planActivity(planId),
         queryParameters: {
           'limit': limit,
+          ...filters.toQueryParameters(),
           ...?(cursor == null ? null : {'cursor': cursor}),
         },
         parser: (json) => _mapPage(
@@ -257,13 +238,13 @@ class PlanRepositoryImpl implements PlanRepository {
 
   @override
   Future<Map<String, dynamic>> createInvite(
-    String planId, {
-    String? inviteeId,
-  }) async {
+    String planId,
+    CreateInviteRequest request,
+  ) async {
     try {
       final result = await _apiClient.post(
         path: ApiUrl.planInvites(planId),
-        body: inviteeId == null ? {} : {'inviteeId': inviteeId},
+        body: request.toJson(),
         parser: (json) => json as Map<String, dynamic>,
       );
       return result ?? {};

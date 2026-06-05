@@ -12,7 +12,7 @@ class ModalHeaderComponent extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(top: 12.h, bottom: 4.h),
+          padding: EdgeInsets.only(top: 4.h, bottom: 4.h),
           child: Center(
             child: Container(
               width: 40.w,

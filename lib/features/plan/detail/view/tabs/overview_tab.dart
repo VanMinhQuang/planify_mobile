@@ -17,6 +17,7 @@ class OverviewTab extends StatefulWidget {
 
 class _OverviewTabState extends State<OverviewTab> {
   final _commentController = TextEditingController();
+  int _currentImageIndex = 0;
 
   @override
   void dispose() {
@@ -37,6 +38,9 @@ class _OverviewTabState extends State<OverviewTab> {
     final imageUrls = plan.imageUrls.isNotEmpty
         ? plan.imageUrls
         : [if (plan.coverImageUrl?.isNotEmpty == true) plan.coverImageUrl!];
+    final activeImageIndex = imageUrls.isEmpty
+        ? 0
+        : _currentImageIndex.clamp(0, imageUrls.length - 1);
     return Column(
       children: [
         Expanded(
@@ -48,14 +52,32 @@ class _OverviewTabState extends State<OverviewTab> {
                   borderRadius: BorderRadius.circular(8),
                   child: AspectRatio(
                     aspectRatio: 16 / 10,
-                    child: PageView.builder(
-                      itemCount: imageUrls.length,
-                      itemBuilder: (context, index) {
-                        return CachedNetworkImage(
-                          imageUrl: imageUrls[index],
-                          fit: BoxFit.cover,
-                        );
-                      },
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        PageView.builder(
+                          itemCount: imageUrls.length,
+                          onPageChanged: (index) {
+                            setState(() => _currentImageIndex = index);
+                          },
+                          itemBuilder: (context, index) {
+                            return CachedNetworkImage(
+                              imageUrl: imageUrls[index],
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                        if (imageUrls.length > 1)
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 10,
+                            child: _CarouselDots(
+                              count: imageUrls.length,
+                              activeIndex: activeImageIndex,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -162,6 +184,49 @@ class _OverviewTabState extends State<OverviewTab> {
       return;
     }
     _commentController.clear();
+  }
+}
+
+class _CarouselDots extends StatelessWidget {
+  const _CarouselDots({required this.count, required this.activeIndex});
+
+  final int count;
+  final int activeIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Center(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.surface.withValues(alpha: .72),
+          borderRadius: BorderRadius.circular(99),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(count, (index) {
+              final isActive = index == activeIndex;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOut,
+                width: isActive ? 18 : 7,
+                height: 7,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(99),
+                  color: isActive
+                      ? colors.primary
+                      : colors.onSurfaceVariant.withValues(alpha: .38),
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
   }
 }
 

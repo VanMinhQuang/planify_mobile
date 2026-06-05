@@ -1,5 +1,6 @@
 import '../../domain/models/paged_result.dart';
 import '../../domain/models/plan_comment.dart';
+import '../../domain/models/requests/create_comment_request.dart';
 import '../../domain/repository/comment_repository.dart';
 import '../api/api_client.dart';
 import '../constants/api_url.dart';
@@ -40,16 +41,11 @@ class CommentRepositoryImpl implements CommentRepository {
   @override
   Future<PlanComment> createComment(
     String planId,
-    String content, {
-    String? parentCommentId,
-  }) async {
-    final body = <String, dynamic>{'content': content};
-    if (parentCommentId != null) {
-      body['parentCommentId'] = parentCommentId;
-    }
+    CreateCommentRequest request,
+  ) async {
     final result = await _apiClient.post(
       path: ApiUrl.planComments(planId),
-      body: body,
+      body: request.toJson(),
       parser: (json) =>
           PlanCommentDto.fromJson(json as Map<String, dynamic>).toDomain(),
     );
